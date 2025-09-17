@@ -1,0 +1,19 @@
+Level Name,base Stim,Go Probability,Stimulus Path,Probability,Index
+1,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/10KHZ.npz,20,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/10KHZ.npz,20,1
+1,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/10KHZ.npz,20,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/14KHz.npy,20,2
+1,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/10KHZ.npz,20,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/11KHZ.npz,20,3
+1,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/10KHZ.npz,20,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/14KHZ.npz,20,4
+1,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/10KHZ.npz,20,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/10KHz.npy,20,5
+2,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/14KHz.npy,30,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/13KHz.npy,20,6
+2,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/14KHz.npy,30,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/12-25KHZ.npz,20,7
+2,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/14KHz.npy,30,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/14KHz.npy,20,8
+2,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/14KHz.npy,30,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/15KHz.npy,20,9
+2,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/14KHz.npy,30,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/8-75KHZ.npz,20,10
+3,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/12-25KHZ.npz,40,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/12-25KHZ.npz,10,11
+3,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/12-25KHZ.npz,40,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/10KHz.npy,10,12
+3,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/12-25KHZ.npz,40,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/8-75KHZ.npz,10,13
+3,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/12-25KHZ.npz,40,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/12-25KHZ.npz,50,14
+3,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/12-25KHZ.npz,40,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/10KHz.npy,50,15
+3,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/12-25KHZ.npz,40,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/10-5KHZ.npz,50,16
+3,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/12-25KHZ.npz,40,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/7KHZ.npz,50,17
+3,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/12-25KHZ.npz,40,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/15KHz.npy,50,18

@@ -1,0 +1,9 @@
+Level Name,Stimulus Path,Probability,Value,Index
+habituation,/home/educage/git_educage2/educage2/pythonProject1/stimuli/7KHZ.npz,100,go,1
+L1,/home/educage/git_educage2/educage2/pythonProject1/stimuli/7KHZ.npz,50,go,2
+L1,/home/educage/git_educage2/educage2/pythonProject1/stimuli/14KHZ.npz,50,no-go,3
+L1-catch,/home/educage/git_educage2/educage2/pythonProject1/stimuli/7KHZ.npz,47,go,4
+L1-catch,/home/educage/git_educage2/educage2/pythonProject1/stimuli/8-75KHZ.npz,2,catch,5
+L1-catch,/home/educage/git_educage2/educage2/pythonProject1/stimuli/10-5KHZ.npz,2,catch,6
+L1-catch,/home/educage/git_educage2/educage2/pythonProject1/stimuli/12-25KHZ.npz,2,catch,7
+L1-catch,/home/educage/git_educage2/educage2/pythonProject1/stimuli/14KHZ.npz,47,no-go,8

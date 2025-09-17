@@ -1,0 +1,93 @@
+
+--- 2025-09-01 11:16:48 ---
+
+Levels:
+ Level Name                                                           Stimulus Path  Probability Value  Index
+habituation     /home/educage/git_educage2/educage2/pythonProject1/stimuli/7KHZ.npz          100    go      1
+         L1     /home/educage/git_educage2/educage2/pythonProject1/stimuli/7KHZ.npz           50    go      2
+         L1    /home/educage/git_educage2/educage2/pythonProject1/stimuli/14KHZ.npz           50 no-go      3
+   L1-catch     /home/educage/git_educage2/educage2/pythonProject1/stimuli/7KHZ.npz           47    go      4
+   L1-catch  /home/educage/git_educage2/educage2/pythonProject1/stimuli/8-75KHZ.npz            2 catch      5
+   L1-catch  /home/educage/git_educage2/educage2/pythonProject1/stimuli/10-5KHZ.npz            2 catch      6
+   L1-catch /home/educage/git_educage2/educage2/pythonProject1/stimuli/12-25KHZ.npz            2 catch      7
+   L1-catch    /home/educage/git_educage2/educage2/pythonProject1/stimuli/14KHZ.npz           47 no-go      8
+
+Mice:
+ID: 0007DECB4A, Level:L1
+
+Parameters:
+lick_time: 1
+lick_time_bin_size: None
+start_trial_option: 1
+start_trial_time: None
+IR_no_RFID_option: Take the Last RFID
+lick_threshold: 5
+time_to_lick_after_stim: 2
+open_valve_duration: 0.017
+ITI: 1
+ITI_time: None
+stimulus_length: 2
+
+----------------------------------------
+
+--- 2025-09-01 11:19:08 ---
+
+Levels:
+ Level Name                                                           Stimulus Path  Probability Value  Index
+habituation     /home/educage/git_educage2/educage2/pythonProject1/stimuli/7KHZ.npz          100    go      1
+         L1     /home/educage/git_educage2/educage2/pythonProject1/stimuli/7KHZ.npz           50    go      2
+         L1    /home/educage/git_educage2/educage2/pythonProject1/stimuli/14KHZ.npz           50 no-go      3
+   L1-catch     /home/educage/git_educage2/educage2/pythonProject1/stimuli/7KHZ.npz           47    go      4
+   L1-catch  /home/educage/git_educage2/educage2/pythonProject1/stimuli/8-75KHZ.npz            2 catch      5
+   L1-catch  /home/educage/git_educage2/educage2/pythonProject1/stimuli/10-5KHZ.npz            2 catch      6
+   L1-catch /home/educage/git_educage2/educage2/pythonProject1/stimuli/12-25KHZ.npz            2 catch      7
+   L1-catch    /home/educage/git_educage2/educage2/pythonProject1/stimuli/14KHZ.npz           47 no-go      8
+
+Mice:
+ID: 0007DECB4A, Level:L1
+
+Parameters:
+lick_time: 1
+lick_time_bin_size: None
+start_trial_option: 1
+start_trial_time: None
+IR_no_RFID_option: Take the Last RFID
+lick_threshold: 5
+time_to_lick_after_stim: 2
+open_valve_duration: 0.017
+ITI: 1
+ITI_time: None
+stimulus_length: 2
+
+----------------------------------------
+
+--- 2025-09-01 11:21:14 ---
+
+Levels:
+ Level Name                                                           Stimulus Path  Probability Value  Index
+habituation     /home/educage/git_educage2/educage2/pythonProject1/stimuli/7KHZ.npz          100    go      1
+         L1     /home/educage/git_educage2/educage2/pythonProject1/stimuli/7KHZ.npz           50    go      2
+         L1    /home/educage/git_educage2/educage2/pythonProject1/stimuli/14KHZ.npz           50 no-go      3
+   L1-catch     /home/educage/git_educage2/educage2/pythonProject1/stimuli/7KHZ.npz           47    go      4
+   L1-catch  /home/educage/git_educage2/educage2/pythonProject1/stimuli/8-75KHZ.npz            2 catch      5
+   L1-catch  /home/educage/git_educage2/educage2/pythonProject1/stimuli/10-5KHZ.npz            2 catch      6
+   L1-catch /home/educage/git_educage2/educage2/pythonProject1/stimuli/12-25KHZ.npz            2 catch      7
+   L1-catch    /home/educage/git_educage2/educage2/pythonProject1/stimuli/14KHZ.npz           47 no-go      8
+
+Mice:
+ID: 0007DECB4A, Level:L1
+
+Parameters:
+lick_time: 1
+lick_time_bin_size: None
+start_trial_option: 1
+start_trial_time: None
+IR_no_RFID_option: Take the Last RFID
+lick_threshold: 5
+time_to_lick_after_stim: 2
+open_valve_duration: 0.017
+ITI: 1
+ITI_time: None
+stimulus_length: 2
+
+----------------------------------------
