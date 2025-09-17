@@ -1,0 +1,6 @@
+Level Name,Odor Number,value,P(first),P(second),index
+L1,1,go\no-go,50,50,1
+L1,2,go\no-go,50,50,2
+L2,1,go\no-go,50,45,3
+L2,2,go\no-go,50,45,4
+L2,3,catch,0,10,5

@@ -21,7 +21,7 @@ from data_analysis import DataAnalysis
 class TkinterApp:
     def __init__(self, root,exp, exp_name):
         self.root = root
-        self.root.title("Educage")
+        self.root.title("DMTS - olfacto")
         #self.experiment = experiment_1.Experiment(exp_name, self.root)
         self.levels_list = []
         self.levels_df = None
@@ -75,8 +75,8 @@ class TkinterApp:
         self.ok_button.pack(pady=20)
 
         ############# stimuli generator ######
-        self.btnStimGenerator = tk.Button(self.left_frame_bottom, text="stimuli generator", command=self.open_stim_generator) 
-        self.btnStimGenerator.grid(row=0, column=0, padx=10, pady=10)
+        self.btnUpdateGPIO = tk.Button(self.left_frame_bottom, text="Update GPIO", command=self.experiment.create_GPIO_dict)
+        self.btnUpdateGPIO.grid(row=0, column=0, padx=10, pady=10)
         self.btnDataAnalysis = tk.Button(self.left_frame_bottom, text="Data Analysis",command=self.open_data_analysis_window)
         self.btnDataAnalysis.grid(row=0, column=1, padx=10, pady=10)
         self.btnUpdateEmail = tk.Button(self.left_frame_bottom, text="Update User Mail", command=self.update_user_mail)
@@ -97,7 +97,7 @@ class TkinterApp:
             height=5
         )
         self.tree.heading(ColumnNames.LEVEL_NAME, text=ColumnNames.LEVEL_NAME)
-        self.tree.heading(ColumnNames.STIM_PATH, text=ColumnNames.STIM_PATH)
+        self.tree.heading(ColumnNames.ODOR_NUMBER, text=ColumnNames.ODOR_NUMBER)
         self.tree.heading(ColumnNames.VALUE, text=ColumnNames.VALUE)
         self.tree.heading(ColumnNames.P_FIRST, text=ColumnNames.P_FIRST)
         self.tree.heading(ColumnNames.P_SECOND, text=ColumnNames.P_SECOND)
@@ -230,7 +230,7 @@ class TkinterApp:
                 
     def create_level_table(self):
         levels_window = tk.Toplevel(self.root)
-        level_definition_app = levels_table_creating.LevelDefinitionApp(levels_window)
+        level_definition_app = levels_table_creating.LevelDefinitionApp(levels_window, self.experiment)
         self.root.wait_window(levels_window)
         if level_definition_app.save_path:  # Ensure save_path is defined
             self.load_table(level_definition_app.save_path)
@@ -340,10 +340,12 @@ class TkinterApp:
                 "lick_threshold": self.parameters_btns.licks_entry.get(),
                 "time_to_lick_after_stim": self.parameters_btns.time_licks_entry.get(),
                 "open_valve_duration": self.parameters_btns.time_open_valve_entry.get(),
+                "open_odor_duration": self.parameters_btns.time_open_odor_entry.get(),
+                "load_odor_duration": self.parameters_btns.load_odor_duration_entry.get(),
+                "timeout_punishment": self.parameters_btns.timeout_punishment_entry.get(),
                 "ITI": self.parameters_btns.ITI_display_option.get(),
                 "ITI_time": self.parameters_btns.ITI_bin_size_entry.get() if self.parameters_btns.ITI_display_option.get() == '2' else None,
                 "stimulus_length": self.experiment.stim_length,
-                "timeout_punishment": self.parameters_btns.punishment_timeout_entry.get(),
             }
             # Set parameters in the Experiment class
             self.experiment.set_levels_df(self.levels_df)

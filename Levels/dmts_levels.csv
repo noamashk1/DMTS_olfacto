@@ -1,7 +1,0 @@
-Level Name,stim path,value,P(first),P(second),index
-L1,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/7KHZ.npz,go\no-go,100,100,1
-L2,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/7KHZ.npz,go\no-go,50,50,2
-L2,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/14KHZ.npz,go\no-go,50,50,3
-L1,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/7KHZ.npz,go\no-go,50,45,4
-L1,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/14KHZ.npz,go\no-go,50,45,5
-L1,C:/Users/noam4/OneDrive/Desktop/DMTS/stimuli/12-25KHZ.npz,catch,0,10,6

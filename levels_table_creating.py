@@ -9,8 +9,9 @@ from column_constants import ColumnNames
 
 class LevelDefinitionApp:
     
-    def __init__(self, master):
+    def __init__(self, master, experiment):
         self.master = master
+        self.experiment = experiment
         self.master.title("Experiment Level Definition")
         self.frame = tk.Frame(self.master)
         self.frame.pack(padx=10, pady=10)
@@ -66,7 +67,7 @@ class LevelDefinitionApp:
     def header_titles(self):
         # Create header for the stimuli table
         tk.Label(self.stimuli_frame, text=ColumnNames.LEVEL_NAME, font=("Arial", 12, "bold")).grid(row=0, column=0, padx=5, pady=5)
-        tk.Label(self.stimuli_frame, text=ColumnNames.STIM_PATH, font=("Arial", 12, "bold")).grid(row=0, column=1, padx=5, pady=5)
+        tk.Label(self.stimuli_frame, text=ColumnNames.ODOR_NUMBER, font=("Arial", 12, "bold")).grid(row=0, column=1, padx=5, pady=5)
         tk.Label(self.stimuli_frame, text=ColumnNames.VALUE, font=("Arial", 12, "bold")).grid(row=0, column=2, padx=5, pady=5)
         tk.Label(self.stimuli_frame, text=ColumnNames.P_FIRST, font=("Arial", 12, "bold")).grid(row=0, column=3, padx=5, pady=5)
         tk.Label(self.stimuli_frame, text=ColumnNames.P_SECOND, font=("Arial", 12, "bold")).grid(row=0, column=4, padx=5, pady=5)
@@ -146,22 +147,22 @@ class LevelDefinitionApp:
         all_filled = True  # Flag to check if all fields are filled
 
         # Loop through all level entries to pull their contents
-        for level_name, stimulus_entry, value_combobox, p_first_entry, p_second_entry, index_entry in self.stimuli_table_content:
+        for level_name, stimulus_combobox, value_combobox, p_first_entry, p_second_entry, index_entry in self.stimuli_table_content:
             
             #level_name = level_name_row.get().strip()
-            stimulus_path = stimulus_entry.get().strip()
+            odor_number = stimulus_combobox.get().strip()
             value = value_combobox.get().strip()
             p_first = p_first_entry.get().strip()
             p_second = p_second_entry.get().strip()
             index = index_entry.get().strip()
 
             # Check if each required field is filled
-            if not stimulus_path or not value or not p_first or not p_second or not index:
+            if not odor_number or not value or not p_first or not p_second or not index or value == "Select" or odor_number == "Select":
                 all_filled = False
                 break
 
             # הוספת שורה לשמירה
-            data_to_save.append([level_name, stimulus_path, value, p_first, p_second, index])
+            data_to_save.append([level_name, odor_number, value, p_first, p_second, index])
 
         if all_filled:
             levels_dir = os.path.join(os.getcwd(), "Levels")
@@ -197,20 +198,11 @@ class LevelDefinitionApp:
             # Add Level Name label
             tk.Label(self.stimuli_frame, text=level_name).grid(row=row_idx, column=0, padx=5, pady=2)
 
-            # Create a frame to hold the entry and label for the stimulus path
-            stimuli_frame = tk.Frame(self.stimuli_frame)
-            stimuli_frame.grid(row=row_idx, column=1, padx=5, pady=2)
-
-            # Create the Stimuli entry field
-            stimulus_entry = tk.Entry(stimuli_frame)
-            stimulus_entry.pack(side=tk.TOP)  # Pack Entry at the top
-
-            # Create a label to display the filename
-            filename_label = tk.Label(stimuli_frame, text="", fg="gray")  # Gray text for the filename
-            filename_label.pack(side=tk.TOP)  # Pack Label below the Entry
-
-            # Bind the click event for the entry
-            stimulus_entry.bind("<Button-1>", lambda event, entry=stimulus_entry, label=filename_label: self.load_stimulus_file(entry, label))
+            # Create GPIO Combobox for odor selection
+            gpio_keys = list(self.experiment.GPIO_dict.keys())  # Get GPIO keys from experiment
+            stimulus_combobox = ttk.Combobox(self.stimuli_frame, values=gpio_keys, state="readonly")
+            stimulus_combobox.grid(row=row_idx, column=1, padx=5, pady=2)
+            stimulus_combobox.set("Select")  # Placeholder
 
             # Create a Combobox for the value column
             value_combobox = ttk.Combobox(self.stimuli_frame, values=[r"go\no-go", "catch"])
@@ -231,31 +223,31 @@ class LevelDefinitionApp:
 
             # Store all relevant widgets and values for later use
             self.stimuli_table_content.append(
-                (level_name, stimulus_entry, value_combobox, p_first_entry, p_second_entry, index_entry)
+                (level_name, stimulus_combobox, value_combobox, p_first_entry, p_second_entry, index_entry)
             )
 
         # Draw a line separator after the last row of stimuli for this level
         separator = tk.Frame(self.stimuli_frame, height=1, bg="gray")  # Create a frame for the line
         separator.grid(row=start_row + number_of_stimuli + 1, column=0, columnspan=6, sticky="ew", padx=5, pady=5)  # columnspan=6 for the new columns
         
-    def load_stimulus_file(self, entry, label):
-        # Open file dialog to select a stimulus file
-        stimuli_dir = os.path.join(os.getcwd(), "stimuli")
-        default_dir = stimuli_dir if os.path.exists(stimuli_dir) else os.getcwd()
-        file_path = filedialog.askopenfilename(
-        filetypes=(("All Files", "*.*"),),
-        initialdir=default_dir,
-        title="Select Stimulus File"
-    )
-#          file_path = filedialog.askopenfilename(title="Select Stimulus File",
-#                                                  filetypes=(("All Files", "*.*"),))
-        if file_path:  # If a file was selected
-            entry.delete(0, tk.END)  # Clear the current entry
-            entry.insert(0, file_path)  # Insert the selected file path
+#     def load_stimulus_file(self, entry, label):
+#         # Open file dialog to select a stimulus file
+#         stimuli_dir = os.path.join(os.getcwd(), "stimuli")
+#         default_dir = stimuli_dir if os.path.exists(stimuli_dir) else os.getcwd()
+#         file_path = filedialog.askopenfilename(
+#         filetypes=(("All Files", "*.*"),),
+#         initialdir=default_dir,
+#         title="Select Stimulus File"
+#     )
+# #          file_path = filedialog.askopenfilename(title="Select Stimulus File",
+# #                                                  filetypes=(("All Files", "*.*"),))
+#         if file_path:  # If a file was selected
+#             entry.delete(0, tk.END)  # Clear the current entry
+#             entry.insert(0, file_path)  # Insert the selected file path
             
-            # Update the label to show only the filename
-            filename = file_path.split("/")[-1]  # Get the filename from the path
-            label.config(text=filename)  # Update the label with just the filename
+#             # Update the label to show only the filename
+#             filename = file_path.split("/")[-1]  # Get the filename from the path
+#             label.config(text=filename)  # Update the label with just the filename
     
     def _on_mousewheel(self, event):
         """Handle mouse wheel scrolling in the canvas"""

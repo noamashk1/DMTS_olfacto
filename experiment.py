@@ -54,7 +54,16 @@ class Experiment:
         # Creating experiment folder
         self.new_txt_file(self.txt_file_name)
         self.remote_folder = "/mnt/labfolder/Noam/results"
-        # Creating GUI
+        self.GPIO_dict = {
+                1: 5,
+                2: 6,
+                3: 13,
+                4: 19,
+                5: 26,
+                6: 21,
+                7: 20,
+                8: 16
+            }
         self.root = tk.Tk()
         self.GUI = GUI_sections.TkinterApp(self.root, self, exp_name = self.txt_file_name)
         
@@ -193,6 +202,63 @@ class Experiment:
     def save_results(self, filename: str):
         with open(filename, 'w') as f:
             json.dump(self.results, f, indent=4)
+
+    def create_GPIO_dict(self):
+
+        def save_and_close():
+            temp_dict = {}
+            for idx, entry in enumerate(gpio_entries):
+                index = idx + 1
+                gpio_val = entry.get().strip()
+                if not gpio_val.isdigit():
+                    messagebox.showerror("Input Error", f"GPIO value at row {index} must be a number.")
+                    return
+                temp_dict[index] = int(gpio_val)
+            self.GPIO_dict = temp_dict
+            print(self.GPIO_dict)
+            top.destroy()
+
+        def add_row():
+            row_idx = len(gpio_entries)
+            if row_idx >= 32:
+                messagebox.showwarning("Limit", "Maximum 32 rows allowed.")
+                return
+            idx_label = tk.Label(table_frame, text=str(row_idx + 1), width=10)
+            idx_label.grid(row=row_idx + 1, column=0, padx=5, pady=2)
+            gpio_entry = tk.Entry(table_frame, width=10)
+            gpio_entry.grid(row=row_idx + 1, column=1, padx=5, pady=2)
+            gpio_entry.insert(0, "")
+            gpio_entries.append(gpio_entry)
+
+        # Create the popup window
+        top = tk.Toplevel(self.root)
+        top.title("Set GPIO Mapping")
+        top.geometry("250x350")
+        table_frame = tk.Frame(top)
+        table_frame.pack(padx=10, pady=10)
+
+        # Table headers
+        tk.Label(table_frame, text="Index", font=("Arial", 10, "bold"), width=10).grid(row=0, column=0, padx=5, pady=2)
+        tk.Label(table_frame, text="GPIO Number", font=("Arial", 10, "bold"), width=10).grid(row=0, column=1, padx=5, pady=2)
+
+        gpio_entries = []
+        # Fill with current values from self.GPIO_dict (sorted by index)
+        for i, idx in enumerate(sorted(self.GPIO_dict.keys())):
+            gpio_num = self.GPIO_dict[idx]
+            idx_label = tk.Label(table_frame, text=str(idx), width=10)
+            idx_label.grid(row=i + 1, column=0, padx=5, pady=2)
+            gpio_entry = tk.Entry(table_frame, width=10)
+            gpio_entry.grid(row=i + 1, column=1, padx=5, pady=2)
+            gpio_entry.insert(0, str(gpio_num))
+            gpio_entries.append(gpio_entry)
+
+        # Add row button
+        add_btn = tk.Button(top, text="Add Row", command=add_row)
+        add_btn.pack(pady=5)
+
+        # Save button
+        save_btn = tk.Button(top, text="Save", command=save_and_close)
+        save_btn.pack(pady=5)
             
     def upload_data(self):
         subprocess.run(["sudo", "systemctl", "daemon-reload"], check=True)

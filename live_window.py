@@ -164,5 +164,5 @@ class LiveWindow:
         self.trial_value.config(text=str(trial_value))  # Update score label
 
 # Example usage
-live_window = LiveWindow()
+#live_window = LiveWindow()
 

@@ -3,7 +3,8 @@ pandas
 matplotlib
 scipy
 pygame
-RPi.GPIO
+lgpio  # GPIO control library for Raspberry Pi
 pyserial
 objgraph
 psutil
+sounddevice

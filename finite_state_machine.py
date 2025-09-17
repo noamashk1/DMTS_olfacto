@@ -1,7 +1,7 @@
 import os
 import serial
 import time
-import RPi.GPIO as GPIO
+import lgpio
 import threading
 from trial import Trial
 from datetime import datetime
@@ -16,17 +16,17 @@ import pandas as pd
 import shutil
 
 audio_lock = threading.Lock()
-valve_pin = 4  # 23
-IR_pin = 6  # 25
-lick_pin = 17  # 24
+valve_pin = 4 
+IR_pin = 6  
+lick_pin = 17  
+exit_odor_valve_pin = 21
 
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(IR_pin, GPIO.IN)
-GPIO.setup(lick_pin, GPIO.IN)
-GPIO.setup(valve_pin, GPIO.OUT)
-
-GPIO.setwarnings(False)
+# lgpio setup
+h = lgpio.gpiochip_open(0)
+lgpio.gpio_claim_output(h, valve_pin, 0)
+lgpio.gpio_claim_input(h, IR_pin)
+lgpio.gpio_claim_input(h, lick_pin)
+lgpio.gpio_claim_output(h, exit_odor_valve_pin, 0)
 
 ser = serial.Serial(port='/dev/ttyUSB0', baudrate=9600,
                     timeout=0.01)  # timeo1  # Change '/dev/ttyS0' to the detected port
@@ -100,7 +100,8 @@ class State:
     def __init__(self, name, fsm):
         self.name = name
         self.fsm = fsm
-        self.fsm.exp.live_w.deactivate_states_indicators(name)
+        if self.fsm.exp.live_w.activate_window:
+            self.fsm.exp.live_w.deactivate_states_indicators(name)
 
     def on_event(self, event):
         pass
@@ -111,10 +112,11 @@ class IdleState(State):
         super().__init__("Idle", fsm)
         ser.flushInput()  # clear the data from the serial
         self.fsm.current_trial.clear_trial()
-        self.fsm.exp.live_w.update_last_rfid('')
-        self.fsm.exp.live_w.update_level('')
-        self.fsm.exp.live_w.update_score('')
-        self.fsm.exp.live_w.update_trial_value('')
+        if self.fsm.exp.live_w.activate_window:
+            self.fsm.exp.live_w.update_last_rfid('')
+            self.fsm.exp.live_w.update_level('')
+            self.fsm.exp.live_w.update_score('')
+            self.fsm.exp.live_w.update_trial_value('')
 
         log_memory_usage("Enter Idle")
 
@@ -162,11 +164,12 @@ class IdleState(State):
                     print("\nmouse: " + self.fsm.exp.mice_dict[mouse_id].get_id())
                     print("Level: " + self.fsm.exp.mice_dict[mouse_id].get_level())
                     
-                    # בדיקה בסיסית שה-live_w זמין
+
                     if hasattr(self.fsm.exp, 'live_w') and self.fsm.exp.live_w is not None:
                         try:
-                            self.fsm.exp.live_w.update_last_rfid(mouse_id)
-                            self.fsm.exp.live_w.update_level(self.fsm.exp.mice_dict[mouse_id].get_level())
+                            if self.fsm.exp.live_w.activate_window:
+                                self.fsm.exp.live_w.update_last_rfid(mouse_id)
+                                self.fsm.exp.live_w.update_level(self.fsm.exp.mice_dict[mouse_id].get_level())
                         except Exception as e:
                             print(f"[IdleState] Warning: Could not update GUI: {e}")
                     
@@ -198,16 +201,19 @@ class InPortState(State):
         timeout_seconds = 15  # timeout
         start_time = time.time()
 
-        while GPIO.input(IR_pin) != GPIO.HIGH:
+        while lgpio.gpio_read(h, IR_pin) != 1:
             if time.time() - start_time > timeout_seconds:
                 print("Timeout in InPortState: returning to IdleState")
                 self.on_event("timeout")
                 return
             time.sleep(0.09)
 
-        self.fsm.exp.live_w.toggle_indicator("IR", "on")
-        time.sleep(0.1)
-        self.fsm.exp.live_w.toggle_indicator("IR", "off")
+        if self.fsm.exp.live_w.activate_window:
+            self.fsm.exp.live_w.toggle_indicator("IR", "on")
+            time.sleep(0.1)
+            self.fsm.exp.live_w.toggle_indicator("IR", "off")
+        else:
+            time.sleep(0.1)
         print("The mouse entered!")
 
         if self.fsm.exp.exp_params["start_trial_time"] is not None:
@@ -237,16 +243,18 @@ class TrialState(State):
     def run_trial(self):
         self.fsm.current_trial.start_time = datetime.now().strftime('%H:%M:%S.%f')  # Get current time
         self.fsm.current_trial.calculate_stim()
-        self.fsm.exp.live_w.update_trial_value(self.fsm.current_trial.current_value)
+        if self.fsm.exp.live_w.activate_window:
+            self.fsm.exp.live_w.update_trial_value(self.fsm.current_trial.current_value)
 
         #stim_thread = threading.Thread(target=self.tdt_as_stim, args=(lambda: self.stop_threads,))
         #input_thread = threading.Thread(target=self.receive_input, args=(lambda: self.stop_threads,))
-        self.tdt_as_stim()
+        self.odor_stim()
         self.receive_input()
         if self.fsm.current_trial.score is None:
             self.fsm.current_trial.score = self.evaluate_response()
             print("score: " + self.fsm.current_trial.score)
-            self.fsm.exp.live_w.update_score(self.fsm.current_trial.score)
+            if self.fsm.exp.live_w.activate_window:
+                self.fsm.exp.live_w.update_score(self.fsm.current_trial.score)
 
             if self.fsm.current_trial.score == 'hit':
                 self.give_reward()
@@ -256,40 +264,28 @@ class TrialState(State):
         log_memory_usage("After Trial")
         self.on_event('trial_over')
         
-    def tdt_as_stim(self, stop):
-        first_stim_path = self.fsm.current_trial.first_stim_path
-        second_stim_path = self.fsm.current_trial.current_stim_path
-        with audio_lock:  # ensure only one audio action at a time
-            # Try to fetch from preloaded all_signals_df
-            try:
-                df = getattr(self.fsm, 'all_signals_df', None)
-                if df is not None and hasattr(df, 'empty') and not df.empty:
-                    row = df.loc[df['path'] == first_stim_path]
-                    if not row.empty:
-                        first_stim_array = row.iloc[0]['data']
-                        first_sample_rate = row.iloc[0]['fs']
-                    row = df.loc[df['path'] == second_stim_path]
-                    if not row.empty:
-                        second_stim_array = row.iloc[0]['data']
-                        second_sample_rate = row.iloc[0]['fs']
-            except Exception as e:
-                print(f"[TrialState] Warning: lookup in all_signals_df failed for '{first_stim_path}' and '{second_stim_path}': {e}")
-            sd.stop()
-            try:
-                """first play the base stim"""
+    def odor_stim(self, stop):
+        stim_number = self.fsm.current_trial.current_stim_number
+        stim_duration = float(self.fsm.exp.exp_params["open_odor_duration"])
+        odor_gpio = self.fsm.exp.GPIO_dict[stim_number]
+        self.valve_on(odor_gpio)
+        time.sleep(float(self.fsm.exp.exp_params["load_odor_duration"]))
+        try:
+            """first odor stim"""
+            if self.fsm.exp.live_w.activate_window:
                 self.fsm.exp.live_w.toggle_indicator("stim", "on")
-                sd.play(first_stim_array, samplerate=first_sample_rate, blocking=True)
-                """then sleep between two tunes"""
-                time.sleep(1)
-                """then play the secondstim"""
-                sd.play(second_stim_array, samplerate=second_sample_rate, blocking=True)
-            finally:
-                sd.stop()
+            sd.play(first_stim_array, samplerate=first_sample_rate, blocking=True)
+            """then sleep between two odors"""
+            time.sleep(1)
+            """second odor stim"""
+            sd.play(second_stim_array, samplerate=second_sample_rate, blocking=True)
+        finally:
+            if self.fsm.exp.live_w.activate_window:
                 self.fsm.exp.live_w.toggle_indicator("stim", "off")
-                del first_stim_array
-                del second_stim_array
-                del first_sample_rate
-                del second_sample_rate
+            del first_stim_array
+            del second_stim_array
+            del first_sample_rate
+            del second_sample_rate
             
 
     def receive_input(self, stop):
@@ -304,12 +300,14 @@ class TrialState(State):
         self.got_response = False
         print('waiting for licks...')
         while not stop():
-            if GPIO.input(lick_pin) == GPIO.HIGH:
-                self.fsm.exp.live_w.toggle_indicator("lick", "on")
+            if lgpio.gpio_read(h, lick_pin) == 1:  # 1 == HIGH
+                if self.fsm.exp.live_w.activate_window:
+                    self.fsm.exp.live_w.toggle_indicator("lick", "on")
                 self.fsm.current_trial.add_lick_time()
                 counter += 1
                 time.sleep(0.08)
-                self.fsm.exp.live_w.toggle_indicator("lick", "off")
+                if self.fsm.exp.live_w.activate_window:
+                    self.fsm.exp.live_w.toggle_indicator("lick", "off")
                 print("lick detected")
 
                 if counter >= int(self.fsm.exp.exp_params["lick_threshold"]) and not self.got_response:
@@ -324,9 +322,15 @@ class TrialState(State):
         print('num of licks: ' + str(counter))
 
     def give_reward(self):
-        GPIO.output(valve_pin, GPIO.HIGH)
+        self.valve_on(valve_pin)
         time.sleep(float(self.fsm.exp.exp_params["open_valve_duration"]))
-        GPIO.output(valve_pin, GPIO.LOW)
+        self.valve_off(valve_pin)
+
+    def valve_on(self, gpio_number):
+        lgpio.gpio_write(h, gpio_number, 1)
+        
+    def valve_off(self, gpio_number):
+        lgpio.gpio_write(h, gpio_number, 0)
 
     def give_punishment(self):  # after changing to .npz
         with audio_lock:
@@ -351,7 +355,7 @@ class TrialState(State):
             time.sleep(0.5)
             self.fsm.current_trial.write_trial_to_csv(self.fsm.exp.txt_file_path)
             if self.fsm.exp.exp_params['ITI_time'] is None:
-                while GPIO.input(IR_pin) == GPIO.HIGH:
+                while lgpio.gpio_read(h, IR_pin) == 1:  # 1 == HIGH
                     time.sleep(0.09)
                 time.sleep(1)  # wait one sec after exit- before pass to the next trial
             else:
@@ -366,9 +370,14 @@ class FiniteStateMachine:
         self.current_trial = Trial(self)
         self.state = IdleState(self)
         self.all_signals_df = None
-        with np.load('/home/educage/git_educage2/educage2/pythonProject1/stimuli/white_noise.npz', mmap_mode='r') as z:
-            self.noise = z['noise']
-            self.noise_Fs = int(z['Fs'])
+        
+        # Load white noise for punishment
+        try:
+            with np.load('/home/educage/Projects/DMTS_olfacto/stimuli/white_noise.npz', mmap_mode='r') as z:
+                self.noise = z['noise']
+                self.noise_Fs = int(z['Fs'])
+        except FileNotFoundError:
+            print("Warning: white_noise.npz not found, punishment audio will not work")
 
         # Build a DataFrame with all stimuli referenced by the levels table
         self._build_all_signals_df()
