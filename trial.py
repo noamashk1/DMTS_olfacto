@@ -45,15 +45,15 @@ class Trial:
     #     self.current_value = self.calculate_go_no_go(go_probability)
     def calculate_stim(self): #determine if the trial is go\nogo\catch using random
         level_name = self.current_mouse.get_level()
-        level_rows = self.fsm.exp.levels_df.loc[self.fsm.exp.levels_df['Level Name'] == level_name]
-        first_stim_index = self.weighted_random_choice("P(first)", level_rows)
-        second_stim_index = self.weighted_random_choice("P(second)", level_rows)
-        self.first_stim_df = self.fsm.exp.levels_df.loc[(self.fsm.exp.levels_df['Level Name'] == level_name)&(self.fsm.exp.levels_df['Index'] == first_stim_index)]
-        self.second_stim_df = self.fsm.exp.levels_df.loc[(self.fsm.exp.levels_df['Level Name'] == level_name)&(self.fsm.exp.levels_df['Index'] == second_stim_index)]
-        self.first_stim_path = self.first_stim_df.iloc[0]['Stimulus Path']
-        self.second_stim_path = self.second_stim_df.iloc[0]['Stimulus Path']
-        self.first_stim_index = self.first_stim_df.iloc[0]['Index']
-        self.second_stim_index = self.second_stim_df.iloc[0]['Index']
+        level_rows = self.fsm.exp.levels_df.loc[self.fsm.exp.levels_df[ColumnNames.LEVEL_NAME] == level_name]
+        first_stim_index = self.weighted_random_choice(ColumnNames.P_FIRST, level_rows)
+        second_stim_index = self.weighted_random_choice(ColumnNames.P_SECOND, level_rows)
+        self.first_stim_df = self.fsm.exp.levels_df.loc[(self.fsm.exp.levels_df[ColumnNames.LEVEL_NAME] == level_name)&(self.fsm.exp.levels_df[ColumnNames.INDEX] == first_stim_index)]
+        self.second_stim_df = self.fsm.exp.levels_df.loc[(self.fsm.exp.levels_df[ColumnNames.LEVEL_NAME] == level_name)&(self.fsm.exp.levels_df[ColumnNames.INDEX] == second_stim_index)]
+        self.first_stim_number = self.first_stim_df.iloc[0][ColumnNames.ODOR_NUMBER]
+        self.second_stim_number = self.second_stim_df.iloc[0][ColumnNames.ODOR_NUMBER]
+        self.first_stim_index = self.first_stim_df.iloc[0][ColumnNames.INDEX]
+        self.second_stim_index = self.second_stim_df.iloc[0][ColumnNames.INDEX]
         self.current_value = self.calculate_value()
 
     def weighted_random_choice(self, probabilities_column, level_rows):
@@ -70,7 +70,7 @@ class Trial:
         return chosen_index
 
     def calculate_value(self):
-        if self.second_stim_df.iloc[0]['Value'] == "catch":
+        if self.second_stim_df.iloc[0][ColumnNames.VALUE] == "catch":
             return "catch"
         elif self.first_stim_index==self.second_stim_index:
             return "go"
@@ -100,8 +100,8 @@ class Trial:
         current_datetime = datetime.now()
         date = current_datetime.strftime('%Y-%m-%d')  # Get current date
         end_time = current_datetime.strftime('%H:%M:%S.%f')  # Get current time
-        first_stim_name = os.path.basename(self.first_stim_path)
-        second_stim_name = os.path.basename(self.second_stim_path)
+        first_stim_name = self.first_stim_number
+        second_stim_name = self.second_stim_number
         trial_data = [date, self.start_time, end_time, self.current_mouse.id, self.current_mouse.level, self.current_value, self.first_stim_index, first_stim_name, self.second_stim_index, second_stim_name, self.score , self.licks_time]
         with open(txt_file_name, mode='a', newline='') as file:
             writer = csv.writer(file)
