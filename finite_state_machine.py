@@ -14,10 +14,11 @@ import objgraph
 import logging
 import pandas as pd
 import shutil
+import glob
 
 audio_lock = threading.Lock()
 valve_pin = 4 
-IR_pin = 6  
+IR_pin = 27  
 lick_pin = 17  
 exit_odor_valve_pin = 21
 
@@ -28,15 +29,17 @@ lgpio.gpio_claim_input(h, IR_pin)
 lgpio.gpio_claim_input(h, lick_pin)
 lgpio.gpio_claim_output(h, exit_odor_valve_pin, 0)
 
-ser = serial.Serial(port='/dev/ttyUSB0', baudrate=9600,
-                    timeout=0.01)  # timeo1  # Change '/dev/ttyS0' to the detected port
+ports = glob.glob('/dev/ttyUSB*')
+if not ports:
+    raise Exception("No USB serial device found!")
 
-file_log_path = "/home/educage/git_educage2/educage2/pythonProject1/open_files_monitor.log"  # לשנות למיקום שתרצה
-file_logger = logging.getLogger("open_files_monitor")
-file_logger.setLevel(logging.INFO)
-fh = logging.FileHandler(file_log_path)
-fh.setFormatter(logging.Formatter("[%(asctime)s] [FILES] %(message)s"))
-file_logger.addHandler(fh)
+port = ports[0] 
+ser = serial.Serial(port=port, baudrate=9600, timeout=0.01)
+print(f"Connected to {port}")
+
+
+# ser = serial.Serial(port='/dev/ttyUSB0', baudrate=9600,
+#                     timeout=0.01)  # timeo1  # Change '/dev/ttyS0' to the detected port
 
 LOG_FILE = "debug_log.txt"
 memory_log_file = "memory_debug_log.txt"
