@@ -362,6 +362,7 @@ class TrialState(State):
         self.valve_off(valve_pin)
 
     def valve_on(self, gpio_number):
+        print("gpio_number: "+str(gpio_number))
         lgpio.gpio_write(h, gpio_number, 1)
         
     def valve_off(self, gpio_number):
