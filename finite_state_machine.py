@@ -246,8 +246,7 @@ class TrialState(State):
         if self.fsm.exp.live_w.activate_window:
             self.fsm.exp.live_w.update_trial_value(self.fsm.current_trial.current_value)
 
-        #stim_thread = threading.Thread(target=self.tdt_as_stim, args=(lambda: self.stop_threads,))
-        #input_thread = threading.Thread(target=self.receive_input, args=(lambda: self.stop_threads,))
+        # Run odor stimulation first, then receive input
         self.odor_stim()
         self.receive_input()
         if self.fsm.current_trial.score is None:
@@ -264,48 +263,79 @@ class TrialState(State):
         log_memory_usage("After Trial")
         self.on_event('trial_over')
         
-    def odor_stim(self, stop):
-        stim_number = self.fsm.current_trial.current_stim_number
+    def odor_stim(self):
+        first_stim_number = self.fsm.current_trial.first_stim_number
+        first_odor_gpio = self.fsm.exp.GPIO_dict[first_stim_number]
+        second_stim_number = self.fsm.current_trial.second_stim_number
+        second_odor_gpio = self.fsm.exp.GPIO_dict[second_stim_number]
         stim_duration = float(self.fsm.exp.exp_params["open_odor_duration"])
-        odor_gpio = self.fsm.exp.GPIO_dict[stim_number]
-        self.valve_on(odor_gpio)
-        time.sleep(float(self.fsm.exp.exp_params["load_odor_duration"]))
+        
         try:
+            # First odor preparation
+            self.valve_on(first_odor_gpio)
+            time.sleep(float(self.fsm.exp.exp_params["load_odor_duration"]))
+            
             """first odor stim"""
             if self.fsm.exp.live_w.activate_window:
                 self.fsm.exp.live_w.toggle_indicator("stim", "on")
-            sd.play(first_stim_array, samplerate=first_sample_rate, blocking=True)
-            """then sleep between two odors"""
-            time.sleep(1)
-            """second odor stim"""
-            sd.play(second_stim_array, samplerate=second_sample_rate, blocking=True)
-        finally:
+            self.valve_on(exit_odor_valve_pin)
+            time.sleep(stim_duration)
+            self.valve_off(exit_odor_valve_pin)
+            self.valve_off(first_odor_gpio)
             if self.fsm.exp.live_w.activate_window:
                 self.fsm.exp.live_w.toggle_indicator("stim", "off")
-            del first_stim_array
-            del second_stim_array
-            del first_sample_rate
-            del second_sample_rate
+                
+            """then sleep between two odors"""
+            self.valve_on(second_odor_gpio)
+            load_odor_duration = float(self.fsm.exp.exp_params["load_odor_duration"])
+            inter_odor_delay = 1.0
+            inter_delay = max(load_odor_duration, inter_odor_delay)
+            if load_odor_duration > inter_odor_delay:
+                print("[WARNING] The inter-odor delay is shorter than the odor load duration. The wait time between odors is increased due to the load time.")
+            time.sleep(inter_delay)
+                
+            """second odor stim"""
+            if self.fsm.exp.live_w.activate_window:
+                self.fsm.exp.live_w.toggle_indicator("stim", "on")
+            self.valve_on(exit_odor_valve_pin)
+            time.sleep(stim_duration)
+            
+        finally:
+            self.valve_off(exit_odor_valve_pin)
+            self.valve_off(first_odor_gpio)
+            self.valve_off(second_odor_gpio)
+            if self.fsm.exp.live_w.activate_window:
+                self.fsm.exp.live_w.toggle_indicator("stim", "off")
+        
+        print("Odors completed.")
             
 
-    def receive_input(self, stop):
-        if self.fsm.exp.exp_params["lick_time_bin_size"] is not None:
+    def receive_input(self):
+        if self.fsm.exp.exp_params["lick_time_bin_size"] is not None: # By time
             time.sleep(int(self.fsm.exp.exp_params["lick_time_bin_size"]))
-        elif self.fsm.exp.exp_params["lick_time"] == "1":
+        elif self.fsm.exp.exp_params["lick_time"] == "1": # After stim
             pass
-        elif self.fsm.exp.exp_params["lick_time"] == "2":
-            time.sleep(int(self.fsm.exp.exp_params["stimulus_length"]))
 
         counter = 0
         self.got_response = False
+        previous_lick_state = 0  # Track previous state for edge detection (0 = LOW)
         print('waiting for licks...')
-        while not stop():
-            if lgpio.gpio_read(h, lick_pin) == 1:  # 1 == HIGH
+        
+        # Use only the post-stimulus time for lick detection
+        response_time = int(self.fsm.exp.exp_params["time_to_lick_after_stim"])
+        
+        start_time = time.time()
+        
+        while (time.time() - start_time) < response_time:
+            current_lick_state = lgpio.gpio_read(h, lick_pin)
+            # Only count lick on transition from LOW to HIGH (rising edge)
+            if current_lick_state == 1 and previous_lick_state == 0:  # 1 == HIGH, 0 == LOW
                 if self.fsm.exp.live_w.activate_window:
                     self.fsm.exp.live_w.toggle_indicator("lick", "on")
+                    time.sleep(0.08) #wait for the lick to be visible on the indicator
                 self.fsm.current_trial.add_lick_time()
                 counter += 1
-                time.sleep(0.08)
+                
                 if self.fsm.exp.live_w.activate_window:
                     self.fsm.exp.live_w.toggle_indicator("lick", "off")
                 print("lick detected")
@@ -314,7 +344,9 @@ class TrialState(State):
                     self.got_response = True
                     print('threshold reached')
                     break
-
+            
+            # Update previous state for next iteration
+            previous_lick_state = current_lick_state
             time.sleep(0.08)
 
         if not self.got_response:

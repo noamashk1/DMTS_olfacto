@@ -10,7 +10,7 @@ class ParametersApp:
         self.font_style = tkFont.Font(family="Helvetica", size=13)
 #####################################################################################
         # Variable to track selected display option
-        self.lick_time_display_option = tk.StringVar(value='1')  # Default to 1
+        self.lick_time_display_option = tk.StringVar(value='1')  # Default to "After stim"
 
         # lick_time (when to start counting licks) Radiobuttons frame
         self.lick_time_radiobuttons_frame = tk.Frame(root)
@@ -18,15 +18,13 @@ class ParametersApp:
         self.lick_time_custom_input_label = tk.Label(self.lick_time_radiobuttons_frame, text=" When to start counting the licks:", font=self.font_style)
         self.lick_time_custom_input_label.pack(anchor=tk.W)
         # Radiobuttons with command to trigger display of entry field
-        tk.Radiobutton(self.lick_time_radiobuttons_frame, text="With stim", variable=self.lick_time_display_option, value='1',
-                       font=self.font_style, command=self.lick_time_show_entry_field).pack(anchor=tk.W)
-        tk.Radiobutton(self.lick_time_radiobuttons_frame, text="After stim", variable=self.lick_time_display_option, value='2',
+        tk.Radiobutton(self.lick_time_radiobuttons_frame, text="After stim", variable=self.lick_time_display_option, value='1',
                        font=self.font_style, command=self.lick_time_show_entry_field).pack(anchor=tk.W)
 
         # Radiobutton with associated entry field
         self.lick_time_bin_size_frame = tk.Frame(self.lick_time_radiobuttons_frame)
         self.lick_time_bin_size_radiobutton = tk.Radiobutton(self.lick_time_bin_size_frame, text="By time",
-                                                   variable=self.lick_time_display_option, value='3',
+                                                   variable=self.lick_time_display_option, value='2',
                                                    font=self.font_style, command=self.lick_time_show_entry_field)
         self.lick_time_bin_size_radiobutton.pack(side=tk.LEFT) #
 
