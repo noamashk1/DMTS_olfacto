@@ -3,7 +3,7 @@ from typing import List, Dict, Any
 import trial
 from level import Level
 from mouse import Mouse
-#from finite_state_machine import FiniteStateMachine
+from finite_state_machine import FiniteStateMachine
 import tkinter as tk
 from tkinter import simpledialog
 import threading

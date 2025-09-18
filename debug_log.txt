@@ -55219,3 +55219,5 @@
 [2025-09-01 14:16:08] [MEM] After Trial Memory usage: 150.45 MB
 [2025-09-01 14:16:09] [MEM] Enter Idle Memory usage: 150.45 MB
 [2025-09-01 14:16:12] [MEM] Enter Trial Memory usage: 150.45 MB
+[2025-09-18 16:50:41] [MEM] Enter Idle Memory usage: 239.80 MB
+[2025-09-18 16:50:59] [MEM] Enter Trial Memory usage: 242.80 MB
