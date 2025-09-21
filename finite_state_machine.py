@@ -409,7 +409,8 @@ class FiniteStateMachine:
         
         # Load white noise for punishment
         try:
-            with np.load('/home/educage/Projects/DMTS_olfacto/stimuli/white_noise.npz', mmap_mode='r') as z:
+            #with np.load('/home/educage/Projects/DMTS_olfacto/stimuli/white_noise.npz', mmap_mode='r') as z:
+            with np.load(os.path.join('stimuli', 'white_noise.npz'), mmap_mode='r') as z:
                 self.noise = z['noise']
                 self.noise_Fs = int(z['Fs'])
         except FileNotFoundError:

@@ -22,7 +22,7 @@ import shutil
 
 ###  use those commands on terminal to push changes to git
 
-# cd /home/educage/git_educage2/educage2/pythonProject1
+# cd /home/educage/Projects/DMTS_olfacto
 # git add .
 # git commit -m ""
 # git push
