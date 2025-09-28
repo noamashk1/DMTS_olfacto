@@ -170,6 +170,7 @@ class LevelDefinitionApp:
 
             # Open the file dialog in the "Levels" folder
             file_path = filedialog.asksaveasfilename(
+                initialdir=levels_dir,
                 defaultextension=".csv",
                 filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
                 title="Save Levels File"

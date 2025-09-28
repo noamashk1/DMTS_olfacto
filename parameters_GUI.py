@@ -155,7 +155,6 @@ class ParametersApp:
         self.ITI_bin_size_entry.pack(side=tk.LEFT, padx=5)
         self.ITI_bin_size_entry.pack_forget()  # Hide initially
         self.ITI_bin_size_frame.pack(anchor=tk.W)
-    
 ###################################################################
     def lick_time_show_entry_field(self):
         """Show entry field only when 'By Bin Size' is selected."""
