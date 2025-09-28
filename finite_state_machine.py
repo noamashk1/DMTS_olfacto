@@ -305,7 +305,7 @@ class TrialState(State):
             
         finally:
             self.valve_off(exit_odor_valve_pin)
-            self.valve_off(first_odor_gpio)
+            #self.valve_off(first_odor_gpio)
             self.valve_off(second_odor_gpio)
             if self.fsm.exp.live_w.activate_window:
                 self.fsm.exp.live_w.toggle_indicator("stim", "off")
