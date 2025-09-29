@@ -1,0 +1,4 @@
+Level Name,Odor Number,value,P(first),P(second),index,is neurolux,P(neurolux)
+L1,7,go\no-go,100,100,1,Yes,80
+L2,7,go\no-go,50,50,2,Yes,80
+L2,8,go\no-go,50,50,3,Yes,100

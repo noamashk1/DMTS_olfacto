@@ -71,20 +71,13 @@ class LevelDefinitionApp:
         tk.Label(self.stimuli_frame, text=ColumnNames.VALUE, font=("Arial", 12, "bold")).grid(row=0, column=2, padx=5, pady=5)
         tk.Label(self.stimuli_frame, text=ColumnNames.P_FIRST, font=("Arial", 12, "bold")).grid(row=0, column=3, padx=5, pady=5)
         tk.Label(self.stimuli_frame, text=ColumnNames.P_SECOND, font=("Arial", 12, "bold")).grid(row=0, column=4, padx=5, pady=5)
-        tk.Label(self.stimuli_frame, text=ColumnNames.INDEX, font=("Arial", 12, "bold")).grid(row=0, column=5, padx=5, pady=5)
+        tk.Label(self.stimuli_frame, text=ColumnNames.IS_NEUROLUX, font=("Arial", 12, "bold")).grid(row=0, column=5, padx=5, pady=5)
+        tk.Label(self.stimuli_frame, text=ColumnNames.P_NEUROLUX, font=("Arial", 12, "bold")).grid(row=0, column=6, padx=5, pady=5)
+        tk.Label(self.stimuli_frame, text=ColumnNames.INDEX, font=("Arial", 12, "bold")).grid(row=0, column=7, padx=5, pady=5)
             
     
     def load_levels(self):
         # Clear previous stimuli frame if it exists
-        # if self.stimuli_frame is not None:
-        #     for widget in self.stimuli_frame.winfo_children():
-        #         widget.destroy()
-        #     self.header_titles()
-        # else:
-        #     # Create stimuli frame if it doesn't exist
-        #     self.stimuli_frame = tk.Frame(self.master)
-        #     self.stimuli_frame.pack(side="left", padx=10, pady=10)
-        #     self.header_titles()
         if self.stimuli_container is not None:
             self.stimuli_container.destroy()
             
@@ -93,7 +86,7 @@ class LevelDefinitionApp:
         self.stimuli_container.pack(side="left", padx=10, pady=10, fill="both", expand=True)
         
         # Create canvas and scrollbar for scrolling
-        self.canvas = tk.Canvas(self.stimuli_container, width=800, height=400)
+        self.canvas = tk.Canvas(self.stimuli_container, width=1100, height=400)
         self.scrollbar = tk.Scrollbar(self.stimuli_container, orient="vertical", command=self.canvas.yview)
         self.scrollable_frame = tk.Frame(self.canvas)
         
@@ -147,22 +140,36 @@ class LevelDefinitionApp:
         all_filled = True  # Flag to check if all fields are filled
 
         # Loop through all level entries to pull their contents
-        for level_name, stimulus_combobox, value_combobox, p_first_entry, p_second_entry, index_entry in self.stimuli_table_content:
+        for level_name, stimulus_combobox, value_combobox, p_first_entry, p_second_entry, is_neurolux_combobox, p_neurolux_entry, index_entry in self.stimuli_table_content:
             
             #level_name = level_name_row.get().strip()
             odor_number = stimulus_combobox.get().strip()
             value = value_combobox.get().strip()
             p_first = p_first_entry.get().strip()
             p_second = p_second_entry.get().strip()
+            is_neurolux = is_neurolux_combobox.get().strip()
+            p_neurolux = p_neurolux_entry.get().strip()
             index = index_entry.get().strip()
 
             # Check if each required field is filled
-            if not odor_number or not value or not p_first or not p_second or not index or value == "Select" or odor_number == "Select":
+            if not odor_number or not value or not p_first or not p_second or not index or not p_neurolux or value == "Select" or odor_number == "Select":
+                all_filled = False
+                break
+
+            # Validate P(neurolux) is a number between 0-100
+            try:
+                p_neurolux_val = float(p_neurolux)
+                if p_neurolux_val < 0 or p_neurolux_val > 100:
+                    messagebox.showwarning("Input Error", f"P(neurolux) must be between 0 and 100. Found: {p_neurolux}")
+                    all_filled = False
+                    break
+            except ValueError:
+                messagebox.showwarning("Input Error", f"P(neurolux) must be a valid number. Found: {p_neurolux}")
                 all_filled = False
                 break
 
             # הוספת שורה לשמירה
-            data_to_save.append([level_name, odor_number, value, p_first, p_second, index])
+            data_to_save.append([level_name, odor_number, value, p_first, p_second, is_neurolux, p_neurolux, index])
 
         if all_filled:
             levels_dir = os.path.join(os.getcwd(), "Levels")
@@ -218,37 +225,28 @@ class LevelDefinitionApp:
             p_second_entry = tk.Entry(self.stimuli_frame)
             p_second_entry.grid(row=row_idx, column=4, padx=5, pady=2)
 
+            # Create the is neurolux combobox with Yes/No options (default No)
+            is_neurolux_combobox = ttk.Combobox(self.stimuli_frame, values=["No", "Yes"], state="readonly")
+            is_neurolux_combobox.grid(row=row_idx, column=5, padx=5, pady=2)
+            is_neurolux_combobox.set("No")  # Default to No
+
+            # Create the P(neurolux) entry field for numbers 0-100
+            p_neurolux_entry = tk.Entry(self.stimuli_frame)
+            p_neurolux_entry.grid(row=row_idx, column=6, padx=5, pady=2)
+            p_neurolux_entry.insert(0, "0")  # Default value 0
+
             # Create the index entry field
             index_entry = tk.Entry(self.stimuli_frame)
-            index_entry.grid(row=row_idx, column=5, padx=5, pady=2)
+            index_entry.grid(row=row_idx, column=7, padx=5, pady=2)
 
             # Store all relevant widgets and values for later use
             self.stimuli_table_content.append(
-                (level_name, stimulus_combobox, value_combobox, p_first_entry, p_second_entry, index_entry)
+                (level_name, stimulus_combobox, value_combobox, p_first_entry, p_second_entry, is_neurolux_combobox, p_neurolux_entry, index_entry)
             )
 
         # Draw a line separator after the last row of stimuli for this level
         separator = tk.Frame(self.stimuli_frame, height=1, bg="gray")  # Create a frame for the line
-        separator.grid(row=start_row + number_of_stimuli + 1, column=0, columnspan=6, sticky="ew", padx=5, pady=5)  # columnspan=6 for the new columns
-        
-#     def load_stimulus_file(self, entry, label):
-#         # Open file dialog to select a stimulus file
-#         stimuli_dir = os.path.join(os.getcwd(), "stimuli")
-#         default_dir = stimuli_dir if os.path.exists(stimuli_dir) else os.getcwd()
-#         file_path = filedialog.askopenfilename(
-#         filetypes=(("All Files", "*.*"),),
-#         initialdir=default_dir,
-#         title="Select Stimulus File"
-#     )
-# #          file_path = filedialog.askopenfilename(title="Select Stimulus File",
-# #                                                  filetypes=(("All Files", "*.*"),))
-#         if file_path:  # If a file was selected
-#             entry.delete(0, tk.END)  # Clear the current entry
-#             entry.insert(0, file_path)  # Insert the selected file path
-            
-#             # Update the label to show only the filename
-#             filename = file_path.split("/")[-1]  # Get the filename from the path
-#             label.config(text=filename)  # Update the label with just the filename
+        separator.grid(row=start_row + number_of_stimuli + 1, column=0, columnspan=8, sticky="ew", padx=5, pady=5)  # columnspan=8 for all columns including index at the end
     
     def _on_mousewheel(self, event):
         """Handle mouse wheel scrolling in the canvas"""

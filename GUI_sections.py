@@ -84,9 +84,9 @@ class TkinterApp:
 
 
         # Create a Frame to hold the Treeview and Scrollbars
-        self.tree_frame = tk.Frame(self.left_frame_top, width=600)
+        self.tree_frame = tk.Frame(self.left_frame_top, width=800)
         self.tree_frame.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
-        self.tree_frame.config(width=600, height=200)
+        self.tree_frame.config(width=800, height=200)
         self.tree_frame.pack_propagate(False)
 
         # Prepare the Treeview in the tree frame with updated columns
@@ -101,6 +101,8 @@ class TkinterApp:
         self.tree.heading(ColumnNames.VALUE, text=ColumnNames.VALUE)
         self.tree.heading(ColumnNames.P_FIRST, text=ColumnNames.P_FIRST)
         self.tree.heading(ColumnNames.P_SECOND, text=ColumnNames.P_SECOND)
+        self.tree.heading(ColumnNames.IS_NEUROLUX, text=ColumnNames.IS_NEUROLUX)
+        self.tree.heading(ColumnNames.P_NEUROLUX, text=ColumnNames.P_NEUROLUX)
         self.tree.heading(ColumnNames.INDEX, text=ColumnNames.INDEX)
 
 
