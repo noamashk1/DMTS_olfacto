@@ -7,6 +7,7 @@ import subprocess
 import tkinter as tk
 import smtplib
 from General_functions import send_email
+from datetime import datetime
 
 
 class MemoryMonitor:
@@ -45,7 +46,8 @@ class MemoryMonitor:
         while self.monitoring:
             try:
                 current_memory = self._get_current_memory_mb()
-                print(f"[MemoryMonitor] Memory usage {current_memory:.1f}MB , threshold {self.threshold_mb}MB")
+                
+                print(f"[MemoryMonitor] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Memory usage {current_memory:.1f}MB , threshold {self.threshold_mb}MB")
                 
                 # Check if memory has reached 100MB below threshold and warning hasn't been shown yet
                 if not self.warning_shown and current_memory > (self.threshold_mb - 100):
