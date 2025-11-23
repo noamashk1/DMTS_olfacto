@@ -7,7 +7,7 @@ class LiveWindow:
         # Create the main window
         self.root = tk.Toplevel()
         self.root.title("Live Window")
-        self.root.geometry("300x610")  # Set the window dimensions to 400x600 pixels
+        self.root.geometry("300x640")  # Set the window dimensions to 400x600 pixels
         
         self.pause = False
         self.activate_window = False
