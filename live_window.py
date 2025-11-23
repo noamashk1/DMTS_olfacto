@@ -7,7 +7,7 @@ class LiveWindow:
         # Create the main window
         self.root = tk.Toplevel()
         self.root.title("Live Window")
-        self.root.geometry("300x530")  # Set the window dimensions to 400x600 pixels
+        self.root.geometry("300x610")  # Set the window dimensions to 400x600 pixels
         
         self.pause = False
         self.activate_window = False
@@ -34,13 +34,22 @@ class LiveWindow:
         # Label for the level of the last RFID 
         self.create_labeled_frame("level:")
 
+        # Label for score with frame
+        self.create_labeled_frame("trial value:")
+
+        # Label for the current stimulus
+        self.create_labeled_frame("stimulus:")
+
+        # Subtitle for indicators
+        indicators_label = tk.Label(self.root, text="Indicators:", font=("Arial", 14))
+        indicators_label.pack(anchor='w', padx=(10, 5), pady=(10, 5))
+
         # Create indicator bulbs for additional status
         self.lick_bulb = self.create_indicator("Lick")
         self.ir_bulb = self.create_indicator("IR")
         self.stimulus_bulb = self.create_indicator("Stimulus")
 
-        # Label for score with frame
-        self.create_labeled_frame("trial value:")
+
         
         # Label for score with frame
         self.create_labeled_frame("score:")
@@ -106,7 +115,9 @@ class LiveWindow:
         if label_text == "last RFID:":
             self.last_rfid_value = value_label  # Store reference to the last RFID label
         elif label_text == "level:":
-            self.level_value = value_label  
+            self.level_value = value_label 
+        elif label_text == "stimulus:":
+            self.stimulus_value = value_label 
         elif label_text == "trial value:":
             self.trial_value = value_label  
         elif label_text == "score:":
@@ -189,6 +200,9 @@ class LiveWindow:
         
     def update_trial_value(self, trial_value):
         self.trial_value.config(text=str(trial_value))  # Update score label
+        
+    def update_stimulus(self, stimulus):
+        self.stimulus_value.config(text=str(stimulus))
 
 # Example usage
 #live_window = LiveWindow()
