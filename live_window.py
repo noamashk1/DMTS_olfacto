@@ -38,7 +38,9 @@ class LiveWindow:
         self.create_labeled_frame("trial value:")
 
         # Label for the current stimulus
-        self.create_labeled_frame("stimulus:")
+        self.create_labeled_frame("stimulus 1:")
+        
+        self.create_labeled_frame("stimulus 2:")
 
         # Subtitle for indicators
         indicators_label = tk.Label(self.root, text="Indicators:", font=("Arial", 14))
@@ -116,8 +118,10 @@ class LiveWindow:
             self.last_rfid_value = value_label  # Store reference to the last RFID label
         elif label_text == "level:":
             self.level_value = value_label 
-        elif label_text == "stimulus:":
-            self.stimulus_value = value_label 
+        elif label_text == "stimulus 1:":
+            self.stimulus_1_value = value_label 
+        elif label_text == "stimulus 2:":
+            self.stimulus_2_value = value_label 
         elif label_text == "trial value:":
             self.trial_value = value_label  
         elif label_text == "score:":
@@ -201,8 +205,11 @@ class LiveWindow:
     def update_trial_value(self, trial_value):
         self.trial_value.config(text=str(trial_value))  # Update score label
         
-    def update_stimulus(self, stimulus):
-        self.stimulus_value.config(text=str(stimulus))
+    def update_stimulus_1(self, stimulus):
+        self.stimulus_1_value.config(text=str(stimulus))
+
+    def update_stimulus_2(self, stimulus):
+        self.stimulus_2_value.config(text=str(stimulus))
 
 # Example usage
 #live_window = LiveWindow()
