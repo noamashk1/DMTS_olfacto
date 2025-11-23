@@ -14,7 +14,7 @@ class ParametersApp:
 
         # lick_time (when to start counting licks) Radiobuttons frame
         self.lick_time_radiobuttons_frame = tk.Frame(root)
-        self.lick_time_radiobuttons_frame.pack(pady=10)
+        self.lick_time_radiobuttons_frame.pack(anchor=tk.W, padx=10, pady=10)
         self.lick_time_custom_input_label = tk.Label(self.lick_time_radiobuttons_frame, text=" When to start counting the licks:", font=self.font_style)
         self.lick_time_custom_input_label.pack(anchor=tk.W)
         # Radiobuttons with command to trigger display of entry field
@@ -40,7 +40,7 @@ class ParametersApp:
 
         # Radiobuttons frame
         self.start_trial_radiobuttons_frame = tk.Frame(root)
-        self.start_trial_radiobuttons_frame.pack(pady=10)
+        self.start_trial_radiobuttons_frame.pack(anchor=tk.W, padx=10, pady=10)
         self.start_trial_custom_input_label = tk.Label(self.start_trial_radiobuttons_frame, text="Start trial:", font=self.font_style)
         self.start_trial_custom_input_label.pack(anchor=tk.W)
         # Radiobuttons with command to trigger display of entry field
@@ -68,7 +68,7 @@ class ParametersApp:
         self.IR_no_RFID = ttk.OptionMenu(self.IR_no_RFID_frame, self.option_var, "Take the Last RFID", "Take the Last RFID", "dont start trial")
         self.IR_no_RFID.pack(pady=2,side=tk.LEFT)
         # Add IR_no_RFID_frame to the root window
-        self.IR_no_RFID_frame.pack(pady=10)
+        self.IR_no_RFID_frame.pack(anchor=tk.W, padx=10, pady=10)
 
 ####################################################################
 
@@ -79,7 +79,7 @@ class ParametersApp:
         self.licks_entry = tk.Entry(self.num_licks_frame, font=self.font_style, width=5)
         self.licks_entry.insert(0,"5")
         self.licks_entry.pack(side=tk.LEFT, padx=10)
-        self.num_licks_frame.pack(anchor=tk.W,pady=10)
+        self.num_licks_frame.pack(anchor=tk.W, padx=10, pady=10)
 
 #####################################################################
         
@@ -89,7 +89,7 @@ class ParametersApp:
         self.time_licks_entry = tk.Entry(self.time_licks_frame, font=self.font_style, width=5)
         self.time_licks_entry.insert(0,"2")
         self.time_licks_entry.pack(side=tk.LEFT, padx=10)
-        self.time_licks_frame.pack(anchor=tk.W,pady=10)
+        self.time_licks_frame.pack(anchor=tk.W, padx=10, pady=10)
         
 #####################################################################
         
@@ -99,7 +99,7 @@ class ParametersApp:
         self.time_open_valve_entry = tk.Entry(self.time_open_valve_frame, font=self.font_style, width=5)
         self.time_open_valve_entry.insert(0,"0.017")
         self.time_open_valve_entry.pack(side=tk.LEFT, padx=10)
-        self.time_open_valve_frame.pack(anchor=tk.W,pady=10)
+        self.time_open_valve_frame.pack(anchor=tk.W, padx=10, pady=10)
 
 #####################################################################
         
@@ -109,7 +109,7 @@ class ParametersApp:
         self.time_open_odor_entry = tk.Entry(self.time_open_odor_frame, font=self.font_style, width=5)
         self.time_open_odor_entry.insert(0,"0.5")
         self.time_open_odor_entry.pack(side=tk.LEFT, padx=10)
-        self.time_open_odor_frame.pack(anchor=tk.W,pady=10)
+        self.time_open_odor_frame.pack(anchor=tk.W, padx=10, pady=10)
 
 #####################################################################
         
@@ -119,7 +119,7 @@ class ParametersApp:
         self.load_odor_duration_entry = tk.Entry(self.load_odor_duration_frame, font=self.font_style, width=5)
         self.load_odor_duration_entry.insert(0,"1")
         self.load_odor_duration_entry.pack(side=tk.LEFT, padx=10)
-        self.load_odor_duration_frame.pack(anchor=tk.W,pady=10)
+        self.load_odor_duration_frame.pack(anchor=tk.W, padx=10, pady=10)
 
 #####################################################################
         
@@ -129,14 +129,14 @@ class ParametersApp:
         self.timeout_punishment_entry = tk.Entry(self.timeout_punishment_frame, font=self.font_style, width=5)
         self.timeout_punishment_entry.insert(0,"5")
         self.timeout_punishment_entry.pack(side=tk.LEFT, padx=10)
-        self.timeout_punishment_frame.pack(anchor=tk.W,pady=10)
+        self.timeout_punishment_frame.pack(anchor=tk.W, padx=10, pady=10)
 
 #####################################################################
         self.ITI_display_option = tk.StringVar(value='1')  # Default to 1
 
         # Radiobuttons frame
         self.ITI_radiobuttons_frame = tk.Frame(root)
-        self.ITI_radiobuttons_frame.pack(pady=10)
+        self.ITI_radiobuttons_frame.pack(anchor=tk.W, padx=10, pady=10)
         self.ITI_custom_input_label = tk.Label(self.ITI_radiobuttons_frame, text="ITI:", font=self.font_style)
         self.ITI_custom_input_label.pack(anchor=tk.W)
         # Radiobuttons with command to trigger display of entry field
