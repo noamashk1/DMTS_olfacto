@@ -21,6 +21,7 @@ valve_pin = 4
 IR_pin = 27  
 lick_pin = 17  
 exit_odor_valve_pin = 21
+oscilloscope_pin = 18  #########################
 
 # lgpio setup
 h = lgpio.gpiochip_open(0)
@@ -28,6 +29,7 @@ lgpio.gpio_claim_output(h, valve_pin, 0)
 lgpio.gpio_claim_input(h, IR_pin)
 lgpio.gpio_claim_input(h, lick_pin)
 lgpio.gpio_claim_output(h, exit_odor_valve_pin, 0)
+lgpio.gpio_claim_output(h, oscilloscope_pin, 0)  #########################
 
 ports = glob.glob('/dev/ttyUSB*')
 if not ports:
@@ -253,6 +255,8 @@ class TrialState(State):
         current_value = self.fsm.current_trial.current_value
         current_stim_1 = str(self.fsm.current_trial.first_stim_number)
         current_stim_2 = str(self.fsm.current_trial.second_stim_number)
+        
+        
         print(f"Trial value: {current_value}, Stimulus 1: {current_stim_1}, Stimulus 2: {current_stim_2}")
         if self.fsm.exp.live_w.activate_window:
            self.fsm.exp.live_w.update_trial_value(current_value)
@@ -299,13 +303,15 @@ class TrialState(State):
                 self.fsm.exp.live_w.toggle_indicator("stim", "off")
                 
             """then sleep between two odors"""
-            self.valve_on(second_odor_gpio)
+            #self.valve_on(second_odor_gpio)
             load_odor_duration = float(self.fsm.exp.exp_params["load_odor_duration"])
-            inter_odor_delay = 1.0
+            inter_odor_delay = 2
             inter_delay = max(load_odor_duration, inter_odor_delay)
             if load_odor_duration > inter_odor_delay:
                 print("[WARNING] The inter-odor delay is shorter than the odor load duration. The wait time between odors is increased due to the load time.")
             time.sleep(inter_delay)
+            self.valve_on(second_odor_gpio)
+
                 
             """second odor stim"""
             if self.fsm.exp.live_w.activate_window:
@@ -370,11 +376,15 @@ class TrialState(State):
         self.valve_off(valve_pin)
 
     def valve_on(self, gpio_number):
+        gpio_oscilloscope = 18  #########################
         print("gpio_number: "+str(gpio_number))
         lgpio.gpio_write(h, gpio_number, 1)
+        lgpio.gpio_write(h, gpio_oscilloscope, 1)  #########################
         
     def valve_off(self, gpio_number):
+        gpio_oscilloscope = 18 #########################
         lgpio.gpio_write(h, gpio_number, 0)
+        lgpio.gpio_write(h, gpio_oscilloscope, 0) #########################
 
     def give_punishment(self):  # after changing to .npz
         with audio_lock:

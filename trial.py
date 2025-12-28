@@ -48,6 +48,10 @@ class Trial:
         level_rows = self.fsm.exp.levels_df.loc[self.fsm.exp.levels_df[ColumnNames.LEVEL_NAME] == level_name]
         first_stim_index = self.weighted_random_choice(ColumnNames.P_FIRST, level_rows)
         second_stim_index = self.weighted_random_choice(ColumnNames.P_SECOND, level_rows)
+        
+        ## TODO: Change this patch :|||||
+        # second_stim_index = first_stim_index
+
         self.first_stim_df = self.fsm.exp.levels_df.loc[(self.fsm.exp.levels_df[ColumnNames.LEVEL_NAME] == level_name)&(self.fsm.exp.levels_df[ColumnNames.INDEX] == first_stim_index)]
         self.second_stim_df = self.fsm.exp.levels_df.loc[(self.fsm.exp.levels_df[ColumnNames.LEVEL_NAME] == level_name)&(self.fsm.exp.levels_df[ColumnNames.INDEX] == second_stim_index)]
         self.first_stim_number = self.first_stim_df.iloc[0][ColumnNames.ODOR_NUMBER]

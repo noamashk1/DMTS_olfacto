@@ -1,0 +1,3 @@
+Level Name,Odor Number,value,P(first),P(second),is neurolux,P(neurolux),index
+DMTS_dicrimination_2o,1,go\no-go,50,50,No,0,1
+DMTS_dicrimination_2o,3,go\no-go,50,50,No,0,2
