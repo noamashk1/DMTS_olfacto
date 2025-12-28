@@ -21,7 +21,7 @@ valve_pin = 4
 IR_pin = 27  
 lick_pin = 17  
 exit_odor_valve_pin = 21
-oscilloscope_pin = 18  #########################
+oscilloscope_pin = 18  
 
 # lgpio setup
 h = lgpio.gpiochip_open(0)
@@ -29,7 +29,7 @@ lgpio.gpio_claim_output(h, valve_pin, 0)
 lgpio.gpio_claim_input(h, IR_pin)
 lgpio.gpio_claim_input(h, lick_pin)
 lgpio.gpio_claim_output(h, exit_odor_valve_pin, 0)
-lgpio.gpio_claim_output(h, oscilloscope_pin, 0)  #########################
+lgpio.gpio_claim_output(h, oscilloscope_pin, 0)  
 
 ports = glob.glob('/dev/ttyUSB*')
 if not ports:
@@ -305,7 +305,7 @@ class TrialState(State):
             """then sleep between two odors"""
             #self.valve_on(second_odor_gpio)
             load_odor_duration = float(self.fsm.exp.exp_params["load_odor_duration"])
-            inter_odor_delay = 2
+            inter_odor_delay = float(self.fsm.exp.exp_params["inter_odor_delay"])
             inter_delay = max(load_odor_duration, inter_odor_delay)
             if load_odor_duration > inter_odor_delay:
                 print("[WARNING] The inter-odor delay is shorter than the odor load duration. The wait time between odors is increased due to the load time.")
@@ -376,15 +376,13 @@ class TrialState(State):
         self.valve_off(valve_pin)
 
     def valve_on(self, gpio_number):
-        gpio_oscilloscope = 18  #########################
         print("gpio_number: "+str(gpio_number))
         lgpio.gpio_write(h, gpio_number, 1)
-        lgpio.gpio_write(h, gpio_oscilloscope, 1)  #########################
+        lgpio.gpio_write(h, oscilloscope_pin, 1)  #########################
         
     def valve_off(self, gpio_number):
-        gpio_oscilloscope = 18 #########################
         lgpio.gpio_write(h, gpio_number, 0)
-        lgpio.gpio_write(h, gpio_oscilloscope, 0) #########################
+        lgpio.gpio_write(h, oscilloscope_pin, 0) #########################
 
     def give_punishment(self):  # after changing to .npz
         with audio_lock:

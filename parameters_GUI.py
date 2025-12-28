@@ -97,7 +97,7 @@ class ParametersApp:
         self.time_open_valve_label = tk.Label(self.time_open_valve_frame, text="open valve (reward) duration (sec):", font=self.font_style)
         self.time_open_valve_label.pack(side=tk.LEFT)
         self.time_open_valve_entry = tk.Entry(self.time_open_valve_frame, font=self.font_style, width=5)
-        self.time_open_valve_entry.insert(0,"0.017")
+        self.time_open_valve_entry.insert(0,"0.015")
         self.time_open_valve_entry.pack(side=tk.LEFT, padx=10)
         self.time_open_valve_frame.pack(anchor=tk.W, padx=10, pady=10)
 
@@ -117,9 +117,19 @@ class ParametersApp:
         self.load_odor_duration_label = tk.Label(self.load_odor_duration_frame, text="load odor duration (sec):", font=self.font_style)
         self.load_odor_duration_label.pack(side=tk.LEFT)
         self.load_odor_duration_entry = tk.Entry(self.load_odor_duration_frame, font=self.font_style, width=5)
-        self.load_odor_duration_entry.insert(0,"1")
+        self.load_odor_duration_entry.insert(0,"0")
         self.load_odor_duration_entry.pack(side=tk.LEFT, padx=10)
         self.load_odor_duration_frame.pack(anchor=tk.W, padx=10, pady=10)
+
+#####################################################################
+        
+        self.inter_odor_delay_frame = tk.Frame(root)
+        self.inter_odor_delay_label = tk.Label(self.inter_odor_delay_frame, text="inter odor delay (sec):", font=self.font_style)
+        self.inter_odor_delay_label.pack(side=tk.LEFT)
+        self.inter_odor_delay_entry = tk.Entry(self.inter_odor_delay_frame, font=self.font_style, width=5)
+        self.inter_odor_delay_entry.insert(0,"2")
+        self.inter_odor_delay_entry.pack(side=tk.LEFT, padx=10)
+        self.inter_odor_delay_frame.pack(anchor=tk.W, padx=10, pady=10)
 
 #####################################################################
         

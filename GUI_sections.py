@@ -344,6 +344,7 @@ class TkinterApp:
                 "open_valve_duration": self.parameters_btns.time_open_valve_entry.get(),
                 "open_odor_duration": self.parameters_btns.time_open_odor_entry.get(),
                 "load_odor_duration": self.parameters_btns.load_odor_duration_entry.get(),
+                "inter_odor_delay": self.parameters_btns.inter_odor_delay_entry.get(),
                 "timeout_punishment": self.parameters_btns.timeout_punishment_entry.get(),
                 "ITI": self.parameters_btns.ITI_display_option.get(),
                 "ITI_time": self.parameters_btns.ITI_bin_size_entry.get() if self.parameters_btns.ITI_display_option.get() == '2' else None,
