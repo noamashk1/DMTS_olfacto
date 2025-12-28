@@ -17,9 +17,9 @@ class Trial:
         self.current_exp_parameters = None
         self.score = None
         self.start_time = None
-
-        
         self.licks_time = []
+        self.licks_time_SW = []
+        self.mouse_exited_SW_time = []
 
     def update_current_mouse(self, new_mouse: 'Mouse'):
         self.current_mouse = new_mouse
@@ -94,19 +94,29 @@ class Trial:
         self.start_time = None
         self.current_stim_index = None
         self.licks_time = []
+        self.licks_time_SW = []
+        self.mouse_exited_SW_time = []
 
     def add_lick_time(self):
         current_datetime = datetime.now()
         self.licks_time.append(current_datetime.strftime('%H:%M:%S.%f'))
+
+    def add_lick_time_SW(self):
+        current_datetime = datetime.now()
+        self.licks_time_SW.append(current_datetime.strftime('%H:%M:%S.%f'))
+
+    def add_mouse_exited_SW_time(self):
+        current_datetime = datetime.now()
+        self.mouse_exited_SW_time.append(current_datetime.strftime('%H:%M:%S.%f'))
 # Function to write trial results
     def write_trial_to_csv(self, txt_file_name):
-        header = ['date', 'start time', 'end time', 'mouse ID', 'level', 'value',' first stim index', 'first stim name', 'second stim index', 'second stim name','score', 'licks_time'] # Define the header if the file does not exist yet
+        header = ['date', 'start time', 'end time', 'mouse ID', 'level', 'value',' first stim index', 'first stim name', 'second stim index', 'second stim name','score', 'licks_time_SW', 'licks_time', 'mouse_exited_SW_time'] # Define the header if the file does not exist yet
         current_datetime = datetime.now()
         date = current_datetime.strftime('%Y-%m-%d')  # Get current date
         end_time = current_datetime.strftime('%H:%M:%S.%f')  # Get current time
         first_stim_name = self.first_stim_number
         second_stim_name = self.second_stim_number
-        trial_data = [date, self.start_time, end_time, self.current_mouse.id, self.current_mouse.level, self.current_value, self.first_stim_index, first_stim_name, self.second_stim_index, second_stim_name, self.score , self.licks_time]
+        trial_data = [date, self.start_time, end_time, self.current_mouse.id, self.current_mouse.level, self.current_value, self.first_stim_index, first_stim_name, self.second_stim_index, second_stim_name, self.score , self.licks_time_SW, self.licks_time, self.mouse_exited_SW_time]
         with open(txt_file_name, mode='a', newline='') as file:
             writer = csv.writer(file)
             # Check if the file is empty to write the header

@@ -340,6 +340,7 @@ class TkinterApp:
                 "start_trial_time": self.parameters_btns.start_trial_bin_size_entry.get() if self.parameters_btns.start_trial_display_option.get() == '2' else None,
                 "IR_no_RFID_option": self.parameters_btns.option_var.get(),
                 "lick_threshold": self.parameters_btns.licks_entry.get(),
+                "stim_window_threshold": self.parameters_btns.stim_window_threshold_entry.get(),
                 "time_to_lick_after_stim": self.parameters_btns.time_licks_entry.get(),
                 "open_valve_duration": self.parameters_btns.time_open_valve_entry.get(),
                 "open_odor_duration": self.parameters_btns.time_open_odor_entry.get(),

@@ -83,6 +83,16 @@ class ParametersApp:
 
 #####################################################################
         
+        self.stim_window_threshold_frame = tk.Frame(root)
+        self.stim_window_threshold_label = tk.Label(self.stim_window_threshold_frame, text="stimulus window threshold (licks):", font=self.font_style)
+        self.stim_window_threshold_label.pack(side=tk.LEFT)
+        self.stim_window_threshold_entry = tk.Entry(self.stim_window_threshold_frame, font=self.font_style, width=5)
+        self.stim_window_threshold_entry.insert(0,"7")
+        self.stim_window_threshold_entry.pack(side=tk.LEFT, padx=10)
+        self.stim_window_threshold_frame.pack(anchor=tk.W, padx=10, pady=10)
+
+#####################################################################
+        
         self.time_licks_frame = tk.Frame(root)
         self.time_licks_label = tk.Label(self.time_licks_frame, text="time to count licks after the stimulus (sec):", font=self.font_style)
         self.time_licks_label.pack(side=tk.LEFT)

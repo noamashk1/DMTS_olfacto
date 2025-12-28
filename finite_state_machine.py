@@ -242,12 +242,48 @@ class TrialState(State):
     def __init__(self, fsm):
         super().__init__("trial", fsm)
         log_memory_usage("Enter Trial")
-        self.got_response = None
+        self.got_response = None # response in response window
         self.stop_threads = False
+        self.got_response_SW = None # response in stimulus window
+        self.mouse_exited_SW = False # mouse exit during stimulus window
         self.trial_thread = threading.Thread(target=self.run_trial)
         self.trial_thread.start()
 
+    # def run_trial(self):
+    #     self.fsm.current_trial.start_time = datetime.now().strftime('%H:%M:%S.%f')  # Get current time
+    #     self.fsm.current_trial.calculate_stim()
+    #     # if self.fsm.exp.live_w.activate_window:
+    #     #     self.fsm.exp.live_w.update_trial_value(self.fsm.current_trial.current_value)
+    #     current_value = self.fsm.current_trial.current_value
+    #     current_stim_1 = str(self.fsm.current_trial.first_stim_number)
+    #     current_stim_2 = str(self.fsm.current_trial.second_stim_number)
+        
+        
+    #     print(f"Trial value: {current_value}, Stimulus 1: {current_stim_1}, Stimulus 2: {current_stim_2}")
+    #     if self.fsm.exp.live_w.activate_window:
+    #        self.fsm.exp.live_w.update_trial_value(current_value)
+    #        self.fsm.exp.live_w.update_stimulus_1(current_stim_1)
+    #        self.fsm.exp.live_w.update_stimulus_2(current_stim_2)
+
+    #     # Run odor stimulation first, then receive input
+    #     self.odor_stim()
+    #     self.receive_input()
+    #     if self.fsm.current_trial.score is None:
+    #         self.fsm.current_trial.score = self.evaluate_response()
+    #         print("score: " + self.fsm.current_trial.score)
+    #         if self.fsm.exp.live_w.activate_window:
+    #             self.fsm.exp.live_w.update_score(self.fsm.current_trial.score)
+
+    #         if self.fsm.current_trial.score == 'hit':
+    #             self.give_reward()
+    #         elif self.fsm.current_trial.score == 'fa':
+    #             self.give_punishment()
+        
+    #     log_memory_usage("After Trial")
+    #     self.on_event('trial_over')
+
     def run_trial(self):
+        self.mouse_exited_SW = False  # Reset mouse exit flag for new trial
         self.fsm.current_trial.start_time = datetime.now().strftime('%H:%M:%S.%f')  # Get current time
         self.fsm.current_trial.calculate_stim()
         # if self.fsm.exp.live_w.activate_window:
@@ -263,22 +299,67 @@ class TrialState(State):
            self.fsm.exp.live_w.update_stimulus_1(current_stim_1)
            self.fsm.exp.live_w.update_stimulus_2(current_stim_2)
 
-        # Run odor stimulation first, then receive input
-        self.odor_stim()
-        self.receive_input()
-        if self.fsm.current_trial.score is None:
+        """stimulus window"""
+
+        stim_thread = threading.Thread(target=self.odor_stim, args=(lambda: self.stop_threads,))
+        input_thread = threading.Thread(target=self.receive_input_SW, args=(lambda: self.stop_threads,))
+        IR_check_thread = threading.Thread(target=self.check_IR_exit_SW, args=(lambda: self.stop_threads,))
+
+        stim_thread.start()
+        input_thread.start()
+        IR_check_thread.start()
+
+        while stim_thread.is_alive():
+            if self.got_response_SW or self.mouse_exited_SW: 
+                self.stop_threads = True
+                break
+            time.sleep(0.05)
+
+        stim_thread.join()
+        self.stop_threads = True
+        input_thread.join()
+        IR_check_thread.join()
+
+        if self.mouse_exited_SW:
+            self.fsm.current_trial.score = 'mouse exit'
+            if self.fsm.exp.live_w.activate_window:
+                self.fsm.exp.live_w.update_score(self.fsm.current_trial.score)
+            self.freeze()
+
+        elif self.got_response_SW:
+            self.fsm.current_trial.score = 'early response'
+            if self.fsm.exp.live_w.activate_window:
+                self.fsm.exp.live_w.update_score(self.fsm.current_trial.score)
+            self.freeze() 
+        else:
+
+            """response window"""
+
+            self.stop_threads = False
+            start_limit = time.time()
+            response_window = int(self.fsm.exp.exp_params["time_to_lick_after_stim"])
+            print("\ntime to lick!")
+            self.receive_input(lambda: self.got_response or (time.time() - start_limit > response_window))
+            print("\nstop lick!\n")
+
+        #if self.fsm.current_trial.score is None:   # TODO: remove this check- this is not relevant 
             self.fsm.current_trial.score = self.evaluate_response()
             print("score: " + self.fsm.current_trial.score)
             if self.fsm.exp.live_w.activate_window:
                 self.fsm.exp.live_w.update_score(self.fsm.current_trial.score)
+            
 
             if self.fsm.current_trial.score == 'hit':
                 self.give_reward()
             elif self.fsm.current_trial.score == 'fa':
                 self.give_punishment()
         
+        gc.collect()
         log_memory_usage("After Trial")
+        del stim_thread
+        del input_thread
         self.on_event('trial_over')
+        
         
     def odor_stim(self):
         first_stim_number = self.fsm.current_trial.first_stim_number
@@ -327,6 +408,52 @@ class TrialState(State):
                 self.fsm.exp.live_w.toggle_indicator("stim", "off")
         
         print("Odors completed.")
+
+    def receive_input_SW(self, stop):
+        counter = 0
+        self.got_response_SW = False
+        previous_lick_state = 0  # Track previous state for edge detection
+        print('waiting for licks...')
+        while not stop():
+            current_lick_state = lgpio.gpio_read(h, lick_pin)
+            # Only count lick on transition from LOW to HIGH (rising edge)
+            if current_lick_state == 1 and previous_lick_state == 0:
+                self.fsm.current_trial.add_lick_time_SW()
+                counter += 1
+                if self.fsm.exp.live_w.activate_window:
+                    self.fsm.exp.live_w.toggle_indicator("lick", "on")
+                    time.sleep(0.01) #wait for the lick to be visible on the indicator
+                    self.fsm.exp.live_w.toggle_indicator("lick", "off")
+                print("lick detected")
+
+                if counter >= int(self.fsm.exp.exp_params["stim_window_threshold"]) and not self.got_response_SW:
+                    self.got_response_SW = True
+                    print('stimulus window threshold reached')
+                    break
+            # Update previous state for next iteration
+            previous_lick_state = current_lick_state
+            time.sleep(0.01)
+
+        if not self.got_response_SW:
+            print('no reinforcement response')
+        print('num of reinforcement licks: ' + str(counter))
+
+    def check_IR_exit_SW(self, stop):
+        """Check for IR pin transition from HIGH (1) to LOW (0) - mouse exiting"""
+        previous_IR_state = lgpio.gpio_read(h, IR_pin)  # Get initial state
+        if previous_IR_state == 0:
+            print('\nwarning: IR is already off\n')
+        
+        while not stop():
+            current_IR_state = lgpio.gpio_read(h, IR_pin)
+            # Detect transition from HIGH (1) to LOW (0) - mouse exited
+            if current_IR_state == 0 and previous_IR_state == 1:
+                self.mouse_exited_SW = True
+                print('mouse exit detected during stimulus window')
+                self.fsm.current_trial.add_mouse_exited_SW_time()
+                break
+            previous_IR_state = current_IR_state
+            time.sleep(0.01)
             
 
     def receive_input(self):
@@ -392,6 +519,9 @@ class TrialState(State):
             finally:
                 sd.stop()
                 time.sleep(float(self.fsm.exp.exp_params["timeout_punishment"])) 
+    
+    def freeze(self):
+        time.sleep(3) # TODO: add as parameter?
 
     def evaluate_response(self):
         value = self.fsm.current_trial.current_value
