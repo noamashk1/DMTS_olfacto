@@ -557,7 +557,7 @@ class TrialState(State):
                 time.sleep(float(self.fsm.exp.exp_params["timeout_punishment"])) 
     
     def freeze(self):
-        time.sleep(3) # TODO: add as parameter?
+        time.sleep(float(self.fsm.exp.exp_params["freeze_time"]))
 
     def evaluate_response(self):
         value = self.fsm.current_trial.current_value

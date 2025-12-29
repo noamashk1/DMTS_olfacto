@@ -152,6 +152,16 @@ class ParametersApp:
         self.timeout_punishment_frame.pack(anchor=tk.W, padx=10, pady=10)
 
 #####################################################################
+        
+        self.freeze_time_frame = tk.Frame(root)
+        self.freeze_time_label = tk.Label(self.freeze_time_frame, text="freeze time duration (sec):", font=self.font_style)
+        self.freeze_time_label.pack(side=tk.LEFT)
+        self.freeze_time_entry = tk.Entry(self.freeze_time_frame, font=self.font_style, width=5)
+        self.freeze_time_entry.insert(0,"3")
+        self.freeze_time_entry.pack(side=tk.LEFT, padx=10)
+        self.freeze_time_frame.pack(anchor=tk.W, padx=10, pady=10)
+
+#####################################################################
         self.ITI_display_option = tk.StringVar(value='1')  # Default to 1
 
         # Radiobuttons frame
