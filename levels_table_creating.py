@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog
+from tkinter import messagebox, filedialog, simpledialog
 from tkinter import ttk  # Make sure to import ttk for the Combobox
 import csv  # To handle CSV writing
 from tkinter import filedialog  # To open the file dialog for saving files
@@ -45,6 +45,7 @@ class LevelDefinitionApp:
         
         
         self.save_path = None
+        self.go_prob = None  # Probability for go (0-100)
 
     def add_level(self):
         level_name_entry = tk.Entry(self.frame)
@@ -69,14 +70,65 @@ class LevelDefinitionApp:
         tk.Label(self.stimuli_frame, text=ColumnNames.LEVEL_NAME, font=("Arial", 12, "bold")).grid(row=0, column=0, padx=5, pady=5)
         tk.Label(self.stimuli_frame, text=ColumnNames.ODOR_NUMBER, font=("Arial", 12, "bold")).grid(row=0, column=1, padx=5, pady=5)
         tk.Label(self.stimuli_frame, text=ColumnNames.VALUE, font=("Arial", 12, "bold")).grid(row=0, column=2, padx=5, pady=5)
-        tk.Label(self.stimuli_frame, text=ColumnNames.P_FIRST, font=("Arial", 12, "bold")).grid(row=0, column=3, padx=5, pady=5)
-        tk.Label(self.stimuli_frame, text=ColumnNames.P_SECOND, font=("Arial", 12, "bold")).grid(row=0, column=4, padx=5, pady=5)
+        tk.Label(self.stimuli_frame, text=ColumnNames.P_GO, font=("Arial", 12, "bold")).grid(row=0, column=3, padx=5, pady=5)
+        tk.Label(self.stimuli_frame, text=ColumnNames.P_STIM, font=("Arial", 12, "bold")).grid(row=0, column=4, padx=5, pady=5)
         tk.Label(self.stimuli_frame, text=ColumnNames.IS_NEUROLUX, font=("Arial", 12, "bold")).grid(row=0, column=5, padx=5, pady=5)
         tk.Label(self.stimuli_frame, text=ColumnNames.P_NEUROLUX, font=("Arial", 12, "bold")).grid(row=0, column=6, padx=5, pady=5)
         tk.Label(self.stimuli_frame, text=ColumnNames.INDEX, font=("Arial", 12, "bold")).grid(row=0, column=7, padx=5, pady=5)
             
     
     def load_levels(self):
+        # Reset go_prob to ensure clean state
+        self.go_prob = None
+        
+        # Ask user for go probability
+        dialog = tk.Toplevel(self.master)
+        dialog.title("Go Probability")
+        dialog.geometry("300x150")
+        dialog.transient(self.master)
+        dialog.grab_set()  # Make dialog modal
+        
+        # Center the dialog
+        dialog.update_idletasks()
+        x = (dialog.winfo_screenwidth() // 2) - (dialog.winfo_width() // 2)
+        y = (dialog.winfo_screenheight() // 2) - (dialog.winfo_height() // 2)
+        dialog.geometry(f"+{x}+{y}")
+        
+        tk.Label(dialog, text="Enter Go Probability (0-100):", font=("Arial", 10)).pack(pady=10)
+        
+        entry = tk.Entry(dialog, font=("Arial", 12), width=10)
+        entry.pack(pady=5)
+        entry.focus()
+        
+        error_label = tk.Label(dialog, text="", fg="red", font=("Arial", 9))
+        error_label.pack(pady=2)
+        
+        def validate_and_close():
+            try:
+                value = int(entry.get().strip())
+                if 0 <= value <= 100:
+                    self.go_prob = value
+                    dialog.destroy()
+                else:
+                    error_label.config(text="Please enter a number between 0 and 100")
+            except ValueError:
+                error_label.config(text="Please enter a valid number")
+        
+        def on_enter(event):
+            validate_and_close()
+        
+        entry.bind("<Return>", on_enter)
+        
+        ok_button = tk.Button(dialog, text="OK", command=validate_and_close, width=10)
+        ok_button.pack(pady=10)
+        
+        # Wait for dialog to close
+        dialog.wait_window()
+        
+        # If user closed dialog without entering valid value, return
+        if self.go_prob is None:
+            return
+        
         # Clear previous stimuli frame if it exists
         if self.stimuli_container is not None:
             self.stimuli_container.destroy()
@@ -140,19 +192,19 @@ class LevelDefinitionApp:
         all_filled = True  # Flag to check if all fields are filled
 
         # Loop through all level entries to pull their contents
-        for level_name, stimulus_combobox, value_combobox, p_first_entry, p_second_entry, is_neurolux_combobox, p_neurolux_entry, index_entry in self.stimuli_table_content:
+        for level_name, stimulus_combobox, value_combobox, p_go_entry, p_stim_entry, is_neurolux_combobox, p_neurolux_entry, index_entry in self.stimuli_table_content:
             
             #level_name = level_name_row.get().strip()
             odor_number = stimulus_combobox.get().strip()
             value = value_combobox.get().strip()
-            p_first = p_first_entry.get().strip()
-            p_second = p_second_entry.get().strip()
+            p_go = p_go_entry.get().strip()
+            p_stim = p_stim_entry.get().strip()
             is_neurolux = is_neurolux_combobox.get().strip()
             p_neurolux = p_neurolux_entry.get().strip()
             index = index_entry.get().strip()
 
             # Check if each required field is filled
-            if not odor_number or not value or not p_first or not p_second or not index or not p_neurolux or value == "Select" or odor_number == "Select":
+            if not odor_number or not value or not p_go or not p_stim or not index or not p_neurolux or value == "Select" or odor_number == "Select":
                 all_filled = False
                 break
 
@@ -169,8 +221,33 @@ class LevelDefinitionApp:
                 break
 
             # הוספת שורה לשמירה
-            data_to_save.append([level_name, odor_number, value, p_first, p_second, is_neurolux, p_neurolux, index])
+            data_to_save.append([level_name, odor_number, value, p_go, p_stim, is_neurolux, p_neurolux, index])
 
+        # if all_filled:
+        #     # Check if levels with only one stimulus have P(go) = 100
+        #     from collections import Counter
+        #     level_counts = Counter([row[0] for row in data_to_save])  # Count stimuli per level
+            
+        #     for level_name, stimulus_count in level_counts.items():
+        #         if stimulus_count == 1:
+        #             # Find the row for this level
+        #             for row in data_to_save:
+        #                 if row[0] == level_name:  # level_name is the first element
+        #                     p_go_value = row[3]  # p_go is the 4th element (index 3)
+        #                     try:
+        #                         if float(p_go_value) != 100:
+        #                             messagebox.showwarning("Input Error", 
+        #                                 f"Level '{level_name}' has only one stimulus. P(go) must be 100, but found: {p_go_value}")
+        #                             all_filled = False
+        #                             break
+        #                     except ValueError:
+        #                         messagebox.showwarning("Input Error", 
+        #                             f"Level '{level_name}' has only one stimulus. P(go) must be 100, but the value '{p_go_value}' is not a valid number.")
+        #                         all_filled = False
+        #                         break
+        #             if not all_filled:
+        #                 break
+            
         if all_filled:
             levels_dir = os.path.join(os.getcwd(), "Levels")
             os.makedirs(levels_dir, exist_ok=True)  # Create it if it doesn't exist
@@ -217,13 +294,15 @@ class LevelDefinitionApp:
             value_combobox.grid(row=row_idx, column=2, padx=5, pady=2)
             value_combobox.set("Select")  # Set a default placeholder in the combobox
 
-            # Create the P(first) entry field (user input for this specific stimulus)
-            p_first_entry = tk.Entry(self.stimuli_frame)
-            p_first_entry.grid(row=row_idx, column=3, padx=5, pady=2)
+            # Create the P(go) entry field (user input for this specific stimulus)
+            p_go_entry = tk.Entry(self.stimuli_frame)
+            p_go_entry.grid(row=row_idx, column=3, padx=5, pady=2)
+            if self.go_prob is not None:
+                p_go_entry.insert(0, str(self.go_prob))
 
-            # Create the P(second) entry field
-            p_second_entry = tk.Entry(self.stimuli_frame)
-            p_second_entry.grid(row=row_idx, column=4, padx=5, pady=2)
+            # Create the P(stim) entry field
+            p_stim_entry = tk.Entry(self.stimuli_frame)
+            p_stim_entry.grid(row=row_idx, column=4, padx=5, pady=2)
 
             # Create the is neurolux combobox with Yes/No options (default No)
             is_neurolux_combobox = ttk.Combobox(self.stimuli_frame, values=["No", "Yes"], state="readonly")
@@ -241,7 +320,7 @@ class LevelDefinitionApp:
 
             # Store all relevant widgets and values for later use
             self.stimuli_table_content.append(
-                (level_name, stimulus_combobox, value_combobox, p_first_entry, p_second_entry, is_neurolux_combobox, p_neurolux_entry, index_entry)
+                (level_name, stimulus_combobox, value_combobox, p_go_entry, p_stim_entry, is_neurolux_combobox, p_neurolux_entry, index_entry)
             )
 
         # Draw a line separator after the last row of stimuli for this level

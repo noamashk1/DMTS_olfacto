@@ -46,23 +46,38 @@ class Trial:
     def calculate_stim(self): #determine if the trial is go\nogo\catch using random
         level_name = self.current_mouse.get_level()
         level_rows = self.fsm.exp.levels_df.loc[self.fsm.exp.levels_df[ColumnNames.LEVEL_NAME] == level_name]
-        first_stim_index = self.weighted_random_choice(ColumnNames.P_FIRST, level_rows)
-        second_stim_index = self.weighted_random_choice(ColumnNames.P_SECOND, level_rows)
+        first_stim_index = self.weighted_random_choice(ColumnNames.P_STIM, level_rows)
         
-        ## TODO: Change this patch :|||||
-        # second_stim_index = first_stim_index
-
+        # Define first_stim_df before using it in calculate_value
         self.first_stim_df = self.fsm.exp.levels_df.loc[(self.fsm.exp.levels_df[ColumnNames.LEVEL_NAME] == level_name)&(self.fsm.exp.levels_df[ColumnNames.INDEX] == first_stim_index)]
+        
+        self.current_value = self.calculate_value()
+        if self.current_value == "go":
+            second_stim_index = first_stim_index
+        else:
+            second_stim_index = self.weighted_random_choice(ColumnNames.P_STIM, level_rows, exclude_index=first_stim_index)
+        # second_stim_index = self.weighted_random_choice(ColumnNames.P_SECOND, level_rows)
+    
+
         self.second_stim_df = self.fsm.exp.levels_df.loc[(self.fsm.exp.levels_df[ColumnNames.LEVEL_NAME] == level_name)&(self.fsm.exp.levels_df[ColumnNames.INDEX] == second_stim_index)]
         self.first_stim_number = self.first_stim_df.iloc[0][ColumnNames.ODOR_NUMBER]
         self.second_stim_number = self.second_stim_df.iloc[0][ColumnNames.ODOR_NUMBER]
         self.first_stim_index = self.first_stim_df.iloc[0][ColumnNames.INDEX]
         self.second_stim_index = self.second_stim_df.iloc[0][ColumnNames.INDEX]
-        self.current_value = self.calculate_value()
+        # self.current_value = self.calculate_value()
 
-    def weighted_random_choice(self, probabilities_column, level_rows):
+    def weighted_random_choice(self, probabilities_column, level_rows, exclude_index=None):
         probabilities = level_rows[probabilities_column].tolist()
         indices = level_rows[ColumnNames.INDEX].tolist()
+        
+        # Filter out the excluded index if provided
+        if exclude_index is not None:
+            filtered_data = [(p, idx) for p, idx in zip(probabilities, indices) if idx != exclude_index]
+            if not filtered_data:
+                raise ValueError("No stimuli available after filtering")
+            probabilities = [p for p, idx in filtered_data]
+            indices = [idx for p, idx in filtered_data]
+        
         total_probability = sum(probabilities)
         
         if total_probability == 0:
@@ -73,10 +88,17 @@ class Trial:
         chosen_index = random.choices(indices, weights=normalized_probabilities, k=1)[0]
         return chosen_index
 
+    # def calculate_value(self):
+    #     if self.second_stim_df.iloc[0][ColumnNames.VALUE] == "catch":
+    #         return "catch"
+    #     elif self.first_stim_index==self.second_stim_index:
+    #         return "go"
+    #     else:
+    #         return "no-go"
+
     def calculate_value(self):
-        if self.second_stim_df.iloc[0][ColumnNames.VALUE] == "catch":
-            return "catch"
-        elif self.first_stim_index==self.second_stim_index:
+        p_go = float(self.first_stim_df.iloc[0][ColumnNames.P_GO]) / 100.0  # Convert from 0-100 to 0-1
+        if random.random() < p_go:
             return "go"
         else:
             return "no-go"
