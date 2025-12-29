@@ -301,7 +301,8 @@ class TrialState(State):
 
         """stimulus window"""
 
-        stim_thread = threading.Thread(target=self.odor_stim, args=(lambda: self.stop_threads,))
+        #stim_thread = threading.Thread(target=self.odor_stim, args=(lambda: self.stop_threads,))
+        stim_thread = threading.Thread(target=self.odor_stim)
         input_thread = threading.Thread(target=self.receive_input_SW, args=(lambda: self.stop_threads,))
         IR_check_thread = threading.Thread(target=self.check_IR_exit_SW, args=(lambda: self.stop_threads,))
 
