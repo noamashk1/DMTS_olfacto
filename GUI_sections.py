@@ -28,8 +28,8 @@ class TkinterApp:
         self.experiment = exp
 
         # Set the window dimensions
-        w = 1200
-        h = 800
+        w = 1400
+        h = 900
         self.root.geometry(f"{w}x{h}")  # Adjust the size as needed
 
         # Create LabelFrames for the layout
