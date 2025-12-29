@@ -1,0 +1,3 @@
+Level Name,Odor Number,value,P(go),P(stim),is neurolux,P(neurolux),index
+discrimination,1,go\no-go,50,50,No,0,1
+discrimination,3,go\no-go,50,50,No,0,2
