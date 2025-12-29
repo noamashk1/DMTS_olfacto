@@ -455,8 +455,7 @@ class TrialState(State):
             previous_IR_state = current_IR_state
             time.sleep(0.01)
             
-
-    def receive_input(self):
+    def receive_input(self, stop):
         if self.fsm.exp.exp_params["lick_time_bin_size"] is not None: # By time
             time.sleep(int(self.fsm.exp.exp_params["lick_time_bin_size"]))
         elif self.fsm.exp.exp_params["lick_time"] == "1": # After stim
@@ -467,12 +466,7 @@ class TrialState(State):
         previous_lick_state = 0  # Track previous state for edge detection (0 = LOW)
         print('waiting for licks...')
         
-        # Use only the post-stimulus time for lick detection
-        response_time = int(self.fsm.exp.exp_params["time_to_lick_after_stim"])
-        
-        start_time = time.time()
-        
-        while (time.time() - start_time) < response_time:
+        while not stop():
             current_lick_state = lgpio.gpio_read(h, lick_pin)
             # Only count lick on transition from LOW to HIGH (rising edge)
             if current_lick_state == 1 and previous_lick_state == 0:  # 1 == HIGH, 0 == LOW
@@ -496,6 +490,47 @@ class TrialState(State):
         if not self.got_response:
             print('no response')
         print('num of licks: ' + str(counter))
+        
+    # def receive_input(self):
+    #     if self.fsm.exp.exp_params["lick_time_bin_size"] is not None: # By time
+    #         time.sleep(int(self.fsm.exp.exp_params["lick_time_bin_size"]))
+    #     elif self.fsm.exp.exp_params["lick_time"] == "1": # After stim
+    #         pass
+
+    #     counter = 0
+    #     self.got_response = False
+    #     previous_lick_state = 0  # Track previous state for edge detection (0 = LOW)
+    #     print('waiting for licks...')
+        
+    #     # Use only the post-stimulus time for lick detection
+    #     response_time = int(self.fsm.exp.exp_params["time_to_lick_after_stim"])
+        
+    #     start_time = time.time()
+        
+    #     while (time.time() - start_time) < response_time:
+    #         current_lick_state = lgpio.gpio_read(h, lick_pin)
+    #         # Only count lick on transition from LOW to HIGH (rising edge)
+    #         if current_lick_state == 1 and previous_lick_state == 0:  # 1 == HIGH, 0 == LOW
+    #             self.fsm.current_trial.add_lick_time()
+    #             counter += 1
+    #             if self.fsm.exp.live_w.activate_window:
+    #                 self.fsm.exp.live_w.toggle_indicator("lick", "on")
+    #                 time.sleep(0.01) #wait for the lick to be visible on the indicator
+    #                 self.fsm.exp.live_w.toggle_indicator("lick", "off")
+    #             print("lick detected")
+
+    #             if counter >= int(self.fsm.exp.exp_params["lick_threshold"]) and not self.got_response:
+    #                 self.got_response = True
+    #                 print('threshold reached')
+    #                 break
+            
+    #         # Update previous state for next iteration
+    #         previous_lick_state = current_lick_state
+    #         time.sleep(0.01)
+
+    #     if not self.got_response:
+    #         print('no response')
+    #     print('num of licks: ' + str(counter))
 
     def give_reward(self):
         self.valve_on(valve_pin)
