@@ -262,7 +262,7 @@ class LevelDefinitionApp:
                 defaultextension=".csv",
                 filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
                 title="Save Levels File"
-            )#initialdir=levels_dir,
+            )
 
             if file_path:
                 with open(file_path, mode='w', newline='') as file:
