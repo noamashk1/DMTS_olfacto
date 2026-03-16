@@ -27,25 +27,14 @@ class MainApp:
         self.create_mice_table()
 
         # Button to open the new parameter window
-        self.get_parameter_button = tk.Button(self.miceBtnsFrame, text="Update mice table", command=self.open_parameter_window)
+        self.get_parameter_button = tk.Button(self.miceBtnsFrame, text="Create mice table", command=self.open_parameter_window)
         self.get_parameter_button.pack(pady=10)
         self.load_mice_button = tk.Button(self.miceBtnsFrame, text="Load mice table", command=self.load_mice_list_from_file)
         self.load_mice_button.pack(pady=10)
 
     def load_mice_list_from_file(self):
-#         if len(self.main_GUI.levels_list) == 0:
-#             messagebox.showerror("Error", "You must first set levels for the experiment.")
-#             return
-#         file_path = filedialog.askopenfilename(
-#             title="Select Mice List TXT File",
-#             filetypes=[("Text Files", "*.txt")])
-        # Get the parent directory of the current working directory
-        #parent_dir = os.path.dirname(os.getcwd())
         parent_dir = os.getcwd()
-        # Construct the default path to the "experiments" folder
         default_dir = os.path.join(parent_dir, "experiments")
-        
-        # Open file dialog, starting in the "experiments" folder if it exists
         initial_dir = default_dir if os.path.exists(default_dir) else parent_dir
         file_path = filedialog.askopenfilename(
             initialdir=initial_dir,
@@ -95,33 +84,48 @@ class MainApp:
         self.serial_thread = threading.Thread(target=self.read_from_serial)
         self.serial_thread.start()
         
-                # Create a new Toplevel window
+        # Create a new Toplevel window
         self.parameter_window = tk.Toplevel(self.master)
         self.parameter_window.title("mice table")
         
         General_functions.center_the_window(self.parameter_window,'500x300')
 
-        
-        # Data Display Box for serial readings
-        self.data_display = scrolledtext.ScrolledText(self.parameter_window, height=15, width=15, state=tk.DISABLED)
-        self.data_display.pack(side=tk.LEFT, padx=5, pady=5)
+        # Left column: serial/scan display
+        left_frame = tk.Frame(self.parameter_window)
+        left_frame.pack(side=tk.LEFT, padx=5, pady=5)
+        tk.Label(left_frame, text="Scan / serial readout", font=("Arial", 9, "bold")).pack(anchor="w")
+        self.data_display = scrolledtext.ScrolledText(left_frame, height=15, width=15, state=tk.DISABLED)
+        self.data_display.pack(pady=(2, 0))
 
-        # Unique Data Display Box
-        self.unique_data_display = scrolledtext.ScrolledText(self.parameter_window, height=15, width=15, state=tk.DISABLED)
-        self.unique_data_display.pack(side=tk.RIGHT, padx=5, pady=5)
+        # Right column: mice list display
+        right_frame = tk.Frame(self.parameter_window)
+        right_frame.pack(side=tk.RIGHT, padx=5, pady=5)
+        tk.Label(right_frame, text="Mice list (unique)", font=("Arial", 9, "bold")).pack(anchor="w")
+        self.unique_data_display = scrolledtext.ScrolledText(right_frame, height=15, width=15, state=tk.DISABLED)
+        self.unique_data_display.pack(pady=(2, 0))
 
-        # Add to List Button
+        # Add to List Button (one button-height below top of side windows)
         self.add_to_list_button = tk.Button(self.parameter_window, text="Add to List", command=self.add_to_list)
-        self.add_to_list_button.pack()
-
+        self.add_to_list_button.pack(pady=(35, 5))
 
         # Clear Button
         self.clear_button = tk.Button(self.parameter_window, text="Clear", command=self.clear_box)
-        self.clear_button.pack()
+        self.clear_button.pack(pady=(0, 5))
 
-        # Done Button
+        # Status label for non-modal feedback (e.g., file load result)
+        self.status_label = tk.Label(self.parameter_window, text="", fg="gray")
+        # Push it a bit further down between Clear and Add-from-file buttons
+        self.status_label.pack(pady=(50, 5))
+
+        # Add from existing list Button (will be packed at the bottom)
+        self.add_from_file_button = tk.Button(self.parameter_window, text="Add from existing list", command=self.add_mice_from_file_to_display)
+
+        # Done Button (will be packed at the very bottom)
         self.done_button = tk.Button(self.parameter_window, text="Done", command=self.save_and_close)
-        self.done_button.pack()
+
+        # Pack bottom buttons: Done at the bottom, then Add-from-list above it, with same gap as top pair
+        self.done_button.pack(side=tk.BOTTOM, pady=(5, 5))
+        self.add_from_file_button.pack(side=tk.BOTTOM, pady=(0, 5))
 
         threading.Thread(target=self.read_from_serial, daemon=True).start()
         # Wait for the parameter_window to close before proceeding
@@ -175,6 +179,45 @@ class MainApp:
         self.unique_data_display.config(state=tk.NORMAL)
         self.unique_data_display.delete("1.0", tk.END)
         self.unique_data_display.config(state=tk.DISABLED)
+
+    def add_mice_from_file_to_display(self):
+        """Let user pick a TXT file; add its lines (mice IDs) to the right panel without duplicates."""
+        default_dir = os.path.join(os.getcwd(), "experiments")
+        initial_dir = default_dir if os.path.exists(default_dir) else os.getcwd()
+        file_path = filedialog.askopenfilename(
+            initialdir=initial_dir,
+            title="Select Mice List File",
+            filetypes=(("Text Files", "*.txt"), ("All Files", "*.*"))
+        )
+        if not file_path:
+            return
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                lines = f.read().strip().splitlines()
+            cleaned = [line.strip() for line in lines if line.strip()]
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to read file:\n{e}")
+            return
+        current = self.unique_data_display.get("1.0", tk.END).strip().split("\n")
+        current_set = {s.strip() for s in current if s.strip()}
+        added = []
+        self.unique_data_display.config(state=tk.NORMAL)
+        for mouse_id in cleaned:
+            if mouse_id not in current_set:
+                current_set.add(mouse_id)
+                self.unique_data_display.insert(tk.END, mouse_id + "\n")
+                added.append(mouse_id)
+        self.unique_data_display.config(state=tk.DISABLED)
+
+        # Non-modal status message instead of blocking messagebox
+        if added:
+            msg = f"Added {len(added)} mice from file."
+        else:
+            msg = "No new mice added \n(all were already in the list)."
+        if hasattr(self, "status_label") and self.status_label.winfo_exists():
+            self.status_label.config(text=msg, fg="green" if added else "gray")
+            # Clear the message after 3 seconds
+            self.status_label.after(3000, lambda: self.status_label.config(text=""))
 
     def save_and_close(self):
         self.stop_event.set()
@@ -242,3 +285,13 @@ class MainApp:
         print(f"mice list: {list(data.keys())}")  # Display the dictionary
 
 
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Mice Table")
+    # Minimal GUI-like object so MainApp can run standalone (e.g. open_parameter_window checks levels_list)
+    class MinimalGUI:
+        levels_list = ["Level1"]
+    frame = tk.Frame(root)
+    frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+    app = MainApp(frame, MinimalGUI())
+    root.mainloop()

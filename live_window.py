@@ -8,6 +8,9 @@ class LiveWindow:
         self.root = tk.Toplevel()
         self.root.title("Live Window")
         self.root.geometry("300x640")  # Set the window dimensions to 400x600 pixels
+        # Disable closing the live window via the window's X button
+        # (it will only close when the main experiment window closes)
+        self.root.protocol("WM_DELETE_WINDOW", lambda: None)
         
         self.pause = False
         self.activate_window = False

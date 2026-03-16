@@ -586,8 +586,10 @@ class FiniteStateMachine:
     def __init__(self, experiment=None):
         self.exp = experiment
         self.current_trial = Trial(self)
-        self.state = IdleState(self)
-        
+
+        # Prepare all odor GPIO outputs once, before the FSM starts running
+        self.init_odor_gpio_outputs()
+
         # Load white noise for punishment
         try:
             #with np.load('/home/educage/Projects/DMTS_olfacto/stimuli/white_noise.npz', mmap_mode='r') as z:
@@ -597,6 +599,21 @@ class FiniteStateMachine:
         except FileNotFoundError:
             print("Warning: white_noise.npz not found, punishment audio will not work")
 
+        # Start in Idle state after all init is done
+        self.state = IdleState(self)
+
+    def init_odor_gpio_outputs(self):
+        """
+        Claim all GPIO pins used for odor valves (stimulus lines)
+        once at startup, based on the experiment's GPIO mapping.
+        """
+        if hasattr(self.exp, "GPIO_dict") and isinstance(self.exp.GPIO_dict, dict):
+            for pin in self.exp.GPIO_dict.values():
+                try:
+                    lgpio.gpio_claim_output(h, int(pin), 0)
+                except Exception as e:
+                    print(f"[GPIO init] Failed to claim output for pin {pin}: {e}")
+ 
  
     def on_event(self, event):
         self.state.on_event(event)
