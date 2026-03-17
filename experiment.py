@@ -3,7 +3,10 @@ from typing import List, Dict, Any
 import trial
 from level import Level
 from mouse import Mouse
-#from finite_state_machine import FiniteStateMachine
+try:
+    from finite_state_machine import FiniteStateMachine
+except Exception as e:
+    print("Warning: Failed to import FiniteStateMachine (likely missing GPIO/Raspberry Pi environment).")
 import tkinter as tk
 from tkinter import simpledialog
 import threading

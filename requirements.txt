@@ -1,10 +1,10 @@
-numpy
-pandas
 matplotlib
-scipy
-pygame
-lgpio  # GPIO control library for Raspberry Pi
-pyserial
+numpy
 objgraph
+pandas
 psutil
+pyserial
+scipy
 sounddevice
+#lgpio  # GPIO control library for Raspberry Pi
+
