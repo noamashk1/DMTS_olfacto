@@ -52,10 +52,20 @@ class Trial:
         self.first_stim_df = self.fsm.exp.levels_df.loc[(self.fsm.exp.levels_df[ColumnNames.LEVEL_NAME] == level_name)&(self.fsm.exp.levels_df[ColumnNames.INDEX] == first_stim_index)]
         
         self.current_value = self.calculate_value()
-        if self.current_value == "go":
-            second_stim_index = first_stim_index
+        experiment_type = str(self.fsm.exp.exp_params.get("experiment_type", "DMTS")).upper()
+
+        if experiment_type == "DNMTS":
+            # DNMTS: go = non-match, no-go = match
+            if self.current_value == "go":
+                second_stim_index = self.weighted_random_choice(ColumnNames.P_STIM, level_rows, exclude_index=first_stim_index)
+            else:
+                second_stim_index = first_stim_index
         else:
-            second_stim_index = self.weighted_random_choice(ColumnNames.P_STIM, level_rows, exclude_index=first_stim_index)
+            # DMTS: go = match, no-go = non-match
+            if self.current_value == "go":
+                second_stim_index = first_stim_index
+            else:
+                second_stim_index = self.weighted_random_choice(ColumnNames.P_STIM, level_rows, exclude_index=first_stim_index)
         # second_stim_index = self.weighted_random_choice(ColumnNames.P_SECOND, level_rows)
     
 

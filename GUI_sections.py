@@ -329,6 +329,7 @@ class TkinterApp:
 
             """Retrieve all user-selected parameters from the GUI."""
             parameters = {
+                "experiment_type": self.parameters_btns.experiment_type_option.get(),
                 "lick_time": self.parameters_btns.lick_time_display_option.get(),
                 "lick_time_bin_size": self.parameters_btns.lick_time_bin_size_entry.get() if self.parameters_btns.lick_time_display_option.get() == '3' else None,
                 "start_trial_option": self.parameters_btns.start_trial_display_option.get(),
@@ -476,6 +477,10 @@ class TkinterApp:
         try:
             # עדכון הפרמטרים ב-GUI
             if hasattr(self, 'parameters_btns'):
+                # experiment_type
+                if 'experiment_type' in exp_params and exp_params['experiment_type'] is not None:
+                    self.parameters_btns.experiment_type_option.set(str(exp_params['experiment_type']))
+
                 # lick_time and optional bin size
                 if 'lick_time' in exp_params and exp_params['lick_time'] is not None:
                     self.parameters_btns.lick_time_display_option.set(str(exp_params['lick_time']))

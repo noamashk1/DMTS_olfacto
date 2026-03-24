@@ -9,6 +9,22 @@ class ParametersApp:
 
         self.font_style = tkFont.Font(family="Helvetica", size=13)
 #####################################################################################
+        # Experiment type selection (DMTS / DNMTS)
+        self.experiment_type_frame = tk.Frame(root)
+        self.experiment_type_frame.pack(anchor=tk.W, padx=10, pady=10)
+        self.experiment_type_label = tk.Label(self.experiment_type_frame, text="Experiment Type:", font=self.font_style)
+        self.experiment_type_label.pack(side=tk.LEFT)
+        self.experiment_type_option = tk.StringVar(value="DMTS")  # Default experiment type
+        self.experiment_type_dropdown = ttk.Combobox(
+            self.experiment_type_frame,
+            textvariable=self.experiment_type_option,
+            values=["DMTS", "DNMTS"],
+            state="readonly",
+            width=10
+        )
+        self.experiment_type_dropdown.pack(side=tk.LEFT, padx=10)
+
+#####################################################################################
         # Variable to track selected display option
         self.lick_time_display_option = tk.StringVar(value='1')  # Default to "After stim"
 
