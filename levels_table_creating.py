@@ -5,6 +5,7 @@ import csv  # To handle CSV writing
 from tkinter import filedialog  # To open the file dialog for saving files
 import os
 from column_constants import ColumnNames
+import General_functions
 
 
 def _raise_tk_window(win):
@@ -63,6 +64,9 @@ class LevelDefinitionApp:
         self.save_path = None
         self.go_prob = None  # Probability for go (0-100)
 
+        # Center this Toplevel window after widgets are created.
+        General_functions.center_the_window(self.master)
+
     def add_level(self):
         level_name_entry = tk.Entry(self.frame)
         level_name_entry.grid(row=self.current_row, column=0, padx=5, pady=5)
@@ -80,6 +84,10 @@ class LevelDefinitionApp:
         # Update the positions of the Add and Load buttons
         self.add_button.grid(row=self.current_row, column=0, columnspan=2, pady=10)
         self.load_button.grid(row=self.current_row + 1, column=0, columnspan=2, pady=10)
+        # If the Save button already exists (after "Build stimuli table"),
+        # keep it in sync with the current_row so it doesn't overlap.
+        if self.save_button is not None:
+            self.save_button.grid(row=self.current_row + 2, column=0, columnspan=2, pady=10)
         
     def header_titles(self):
         # Create header for the stimuli table
@@ -103,13 +111,7 @@ class LevelDefinitionApp:
         dialog.geometry("300x150")
         dialog.transient(self.master)
         dialog.grab_set()  # Make dialog modal
-        
-        # Center the dialog
-        dialog.update_idletasks()
-        x = (dialog.winfo_screenwidth() // 2) - (dialog.winfo_width() // 2)
-        y = (dialog.winfo_screenheight() // 2) - (dialog.winfo_height() // 2)
-        dialog.geometry(f"+{x}+{y}")
-        
+
         tk.Label(dialog, text="Enter Go Probability (0-100):", font=("Arial", 10)).pack(pady=10)
         
         entry = tk.Entry(dialog, font=("Arial", 12), width=10)
@@ -138,6 +140,9 @@ class LevelDefinitionApp:
         ok_button = tk.Button(dialog, text="OK", command=validate_and_close, width=10)
         ok_button.pack(pady=10)
         _raise_tk_window(dialog)
+
+        # Widgets are created now -> center reliably
+        General_functions.center_the_window(dialog, "300x150")
         
         # Wait for dialog to close
         dialog.wait_window()
@@ -210,6 +215,9 @@ class LevelDefinitionApp:
                     "Please enter a valid number for the stimuli.",
                     parent=self.master,
                 )
+
+        # Table is built -> recenter the main window (its size changes)
+        General_functions.center_the_window(self.master)
             
     def save_stimuli_table(self):
         # Gather the data from the stimuli table

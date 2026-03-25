@@ -368,6 +368,7 @@ if __name__ == "__main__":
         root = tk.Tk()
         root.title("Experiment Setup")
         root.geometry("350x180")
+        General_functions.center_the_window(root, "350x180")
 
         tk.Label(root, text="Enter Experiment Name:").pack(pady=10)
 
