@@ -21,6 +21,7 @@ import memory_monitor
 import time
 import subprocess
 import shutil
+import General_functions
 
 
 ###  use those commands on terminal to push changes to git
@@ -237,6 +238,7 @@ class Experiment:
         top = tk.Toplevel(self.root)
         top.title("Set GPIO Mapping")
         top.geometry("250x350")
+        General_functions.center_the_window(top, "250x350")
         table_frame = tk.Frame(top)
         table_frame.pack(padx=10, pady=10)
 

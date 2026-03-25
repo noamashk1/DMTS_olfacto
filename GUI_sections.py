@@ -16,7 +16,7 @@ import sounddevice as sd
 import os
 from datetime import datetime
 from data_analysis import DataAnalysis
-
+import General_functions
 
 class TkinterApp:
     def __init__(self, root,exp, exp_name):
@@ -31,6 +31,8 @@ class TkinterApp:
         w = 1400
         h = 900
         self.root.geometry(f"{w}x{h}")  # Adjust the size as needed
+        # Always open main app centered on screen
+        General_functions.center_the_window(self.root, f"{w}x{h}")
 
         # Create LabelFrames for the layout
         self.left_frame_top = tk.LabelFrame(root, text="Levels list", font=("Helvetica", 12, "bold"), padx=10, pady=10)
@@ -229,10 +231,15 @@ class TkinterApp:
         # Error label
         error_label = ttk.Label(stim_window, text="", foreground="red")
         error_label.grid(row=len(params) + 1, column=0, columnspan=2)
+
+        # Center after all widgets were created
+        General_functions.center_the_window(stim_window)
                 
     def create_level_table(self):
         levels_window = tk.Toplevel(self.root)
         level_definition_app = levels_table_creating.LevelDefinitionApp(levels_window, self.experiment)
+        # Center after window content is built
+        General_functions.center_the_window(levels_window)
         self.root.wait_window(levels_window)
         if level_definition_app.save_path:
             self.load_table(level_definition_app.save_path)
@@ -417,6 +424,7 @@ class TkinterApp:
     def open_data_analysis_window(self):
         analysis_root = tk.Toplevel()
         DataAnalysis(analysis_root)
+        General_functions.center_the_window(analysis_root)
 
     def update_user_mail(self):
         try:

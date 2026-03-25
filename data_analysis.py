@@ -9,6 +9,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter1d
 from datetime import datetime
 import ast
+import General_functions
 
 def calculate_d_prime(hits, fas, misses, crs):
     hit_rate = hits / (hits + misses) if (hits + misses) > 0 else 0
@@ -168,6 +169,7 @@ class DataAnalysis:
         canvas = FigureCanvasTkAgg(fig, master=new_window)
         canvas.draw()
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        General_functions.center_the_window(new_window)
 
     def plot_psychometric_curve(self):
         if self.df is None:
@@ -239,6 +241,7 @@ class DataAnalysis:
         canvas = FigureCanvasTkAgg(fig, master=new_window)
         canvas.draw()
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        General_functions.center_the_window(new_window)
 
     def plot_psth(self):
         """יצירת גרף PSTH עבור הקובץ שכבר נטען"""
@@ -419,6 +422,7 @@ class DataAnalysis:
         canvas = FigureCanvasTkAgg(fig, master=new_window)
         canvas.draw()
         canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        General_functions.center_the_window(new_window)
 
 if __name__ == "__main__":
     root = tk.Tk()
