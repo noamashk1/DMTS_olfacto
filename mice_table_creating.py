@@ -8,6 +8,7 @@ import General_functions
 import pandas as pd
 from mouse import Mouse
 import os
+import time
 # Main application
 class MainApp:
     def __init__(self, master, GUI):
@@ -80,9 +81,6 @@ class MainApp:
             self.stop_event.set()
             self.serial_thread.join()  # Wait for it to finish
             self.stop_event.clear()  # Reset the event
-        self.stop_event.clear()  # Clear event flag
-        self.serial_thread = threading.Thread(target=self.read_from_serial)
-        self.serial_thread.start()
         
         # Create a new Toplevel window
         self.parameter_window = tk.Toplevel(self.master)
@@ -127,16 +125,21 @@ class MainApp:
         self.done_button.pack(side=tk.BOTTOM, pady=(5, 5))
         self.add_from_file_button.pack(side=tk.BOTTOM, pady=(0, 5))
 
-        threading.Thread(target=self.read_from_serial, daemon=True).start()
+        self.stop_event.clear()  # Clear event flag
+        self.serial_thread = threading.Thread(target=self.read_from_serial, daemon=True)
+        self.serial_thread.start()
         # Wait for the parameter_window to close before proceeding
         self.parameter_window.wait_window()  # This makes the window modal-like
         
     def read_from_serial(self):
+
         try:
             # Setup Serial Connection (adjust COM4 and 9600 to your needs)
             ser = serial.Serial(port='/dev/ttyUSB0',baudrate=9600,timeout=0.01)#timeout=1  # Change '/dev/ttyS0' to the detected port
             while not self.stop_event.is_set():#True:
                 if ser.in_waiting > 0:
+                    # Brief pause to let the full RFID line arrive before reading
+                    time.sleep(0.02)
                     line = ser.readline().decode('utf-8').strip()
                     self.display_data(line)
         except serial.SerialException as e:

@@ -6,7 +6,7 @@ from mouse import Mouse
 try:
     from finite_state_machine import FiniteStateMachine
 except Exception as e:
-    print("Warning: Failed to import FiniteStateMachine (likely missing GPIO/Raspberry Pi environment).")
+    print(f"Warning: Failed to import FiniteStateMachine (likely missing GPIO/Raspberry Pi environment): {e}")
 import tkinter as tk
 from tkinter import simpledialog
 import threading
