@@ -124,13 +124,13 @@ class LiveWindow:
         elif label_text == "stimulus 1:":
             self.stimulus_1_value = value_label 
         elif label_text == "stimulus 2:":
-            self.stimulus_2_value = value_label 
+            self.stimulus_2_value = value_label
         elif label_text == "trial value:":
             self.trial_value = value_label  
         elif label_text == "score:":
             self.score_value = value_label  
 
-        
+
     def toggle_indicator(self, bulb_name, turn_to):
         # Check current state and toggle the indicator light
         if turn_to == "on":
@@ -149,7 +149,7 @@ class LiveWindow:
             self.lick_bulb.itemconfig(self.indicator_circle, fill=fill)
         elif bulb_name =="stim":
             self.stimulus_bulb.itemconfig(self.indicator_circle, fill=fill)
-    
+
     def on_activate_window(self):
         if self.activate_window == False:
             self.activate_window = True
@@ -165,7 +165,25 @@ class LiveWindow:
             highlightthickness=0,
             bg=(self._activate_btn_default_bg if self._activate_btn_default_bg else "#d9d9d9")  # reset to original or a neutral default
         )
-        
+            self.reset_live_window_indicators()
+
+    def reset_live_window_indicators(self):
+        # Reset state and signal indicators to gray.
+        self.idle_bulb.itemconfig(self.indicator_circle, fill="gray")
+        self.in_port_bulb.itemconfig(self.indicator_circle, fill="gray")
+        self.trial_bulb.itemconfig(self.indicator_circle, fill="gray")
+        self.lick_bulb.itemconfig(self.indicator_circle, fill="gray")
+        self.ir_bulb.itemconfig(self.indicator_circle, fill="gray")
+        self.stimulus_bulb.itemconfig(self.indicator_circle, fill="gray")
+
+        # Clear status fields.
+        self.last_rfid_value.config(text="")
+        self.level_value.config(text="")
+        self.trial_value.config(text="")
+        self.stimulus_1_value.config(text="")
+        self.stimulus_2_value.config(text="")
+        self.score_value.config(text="")
+
     def deactivate_states_indicators(self, state_name):
         self.idle_bulb.itemconfig(self.indicator_circle, fill="gray")  
         self.in_port_bulb.itemconfig(self.indicator_circle, fill="gray") 
@@ -207,7 +225,7 @@ class LiveWindow:
         
     def update_trial_value(self, trial_value):
         self.trial_value.config(text=str(trial_value))  # Update score label
-        
+
     def update_stimulus_1(self, stimulus):
         self.stimulus_1_value.config(text=str(stimulus))
 

@@ -73,7 +73,13 @@ class TkinterApp:
         self.btnLoadLvl.grid(row=1, column=0, padx=10, pady=10)
         self.mice_table = mice_table_creating.MainApp(self.left_frame_middle, self)
         self.parameters_btns = parameters_GUI.ParametersApp(self.right_frame)
-        self.ok_button = tk.Button(self.right_frame, text="OK", command=self.get_parameters)
+        self.OK_COLOR_CLEAN = "#d0d0d0"
+        self.OK_COLOR_UNAPPLIED = "#ff9800"
+        self.last_applied = None
+        self.ok_button = tk.Button(
+            self.right_frame, text="OK", command=self.get_parameters,
+            bg=self.OK_COLOR_CLEAN, activebackground=self.OK_COLOR_CLEAN,
+        )
         self.ok_button.pack(pady=20)
 
         ############# stimuli generator ######
@@ -83,6 +89,8 @@ class TkinterApp:
         self.btnDataAnalysis.grid(row=0, column=1, padx=10, pady=10)
         self.btnUpdateEmail = tk.Button(self.left_frame_bottom, text="Update User Mail", command=self.update_user_mail)
         self.btnUpdateEmail.grid(row=0, column=2, padx=10, pady=10)
+        self.btnShowLog = tk.Button(self.left_frame_bottom, text="Show Log", command=self.show_log)
+        self.btnShowLog.grid(row=0, column=3, padx=10, pady=10)
 
 
         # Create a Frame to hold the Treeview and Scrollbars
@@ -129,6 +137,67 @@ class TkinterApp:
         self.left_frame_top.grid_columnconfigure(0, weight=1)  # Allow the Treeview
         self.left_frame_top.grid_columnconfigure(0, weight=1)  # Allow the Treeview to expand
         self.left_frame_top.grid_columnconfigure(1, weight=0)  # Button does not expand
+
+        self._bind_parameters_unapplied_tracking()
+        self.mice_table.on_levels_changed = self.refresh_ok_button
+        self.last_applied = self.collect_ui_state()
+
+    def _bind_parameters_unapplied_tracking(self):
+        p = self.parameters_btns
+        notify = self.refresh_ok_button
+        for var in (p.experiment_type_option, p.lick_time_display_option,
+                    p.start_trial_display_option, p.ITI_display_option):
+            var.trace_add("write", notify)
+        for entry in (
+            p.lick_time_bin_size_entry,
+            p.start_trial_bin_size_entry,
+            p.licks_entry,
+            p.stim_window_threshold_entry,
+            p.time_licks_entry,
+            p.time_open_valve_entry,
+            p.time_open_odor_entry,
+            p.load_odor_duration_entry,
+            p.inter_odor_delay_entry,
+            p.timeout_punishment_entry,
+            p.freeze_time_entry,
+            p.ITI_bin_size_entry,
+        ):
+            entry.bind("<KeyRelease>", notify)
+            entry.bind("<FocusOut>", notify)
+
+    def collect_ui_state(self):
+        p = self.parameters_btns
+        params = {
+            "experiment_type": p.experiment_type_option.get(),
+            "lick_time": p.lick_time_display_option.get(),
+            "lick_time_bin_size": p.lick_time_bin_size_entry.get(),
+            "start_trial_option": p.start_trial_display_option.get(),
+            "start_trial_time": p.start_trial_bin_size_entry.get(),
+            "lick_threshold": p.licks_entry.get(),
+            "stim_window_threshold": p.stim_window_threshold_entry.get(),
+            "time_to_lick_after_stim": p.time_licks_entry.get(),
+            "open_valve_duration": p.time_open_valve_entry.get(),
+            "open_odor_duration": p.time_open_odor_entry.get(),
+            "load_odor_duration": p.load_odor_duration_entry.get(),
+            "inter_odor_delay": p.inter_odor_delay_entry.get(),
+            "timeout_punishment": p.timeout_punishment_entry.get(),
+            "freeze_time": p.freeze_time_entry.get(),
+            "ITI": p.ITI_display_option.get(),
+            "ITI_time": p.ITI_bin_size_entry.get(),
+        }
+        mice = self.mice_table
+        mice_levels = {
+            str(name): mice.option_vars[i].get()
+            for i, name in enumerate(mice.mice_list or [])
+            if i < len(mice.option_vars)
+        }
+        return {"params": params, "mice_levels": mice_levels}
+
+    def refresh_ok_button(self, *_args):
+        if self.last_applied is None:
+            return
+        color = self.OK_COLOR_UNAPPLIED if self.collect_ui_state() != self.last_applied else self.OK_COLOR_CLEAN
+        self.ok_button.config(bg=color, activebackground=color)
 
     def create_pure_tone(self, freq, voltage, tone_dur, ramp_dur, Fs):
         """
@@ -306,6 +375,8 @@ class TkinterApp:
             self.set_fixed_column_widths()
             self.clear_frame(self.left_frame_middle)                              
             self.mice_table = mice_table_creating.MainApp(self.left_frame_middle, self) ############## restart the mice if already chosen #####################
+            self.mice_table.on_levels_changed = self.refresh_ok_button
+            self.refresh_ok_button()
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load file: {e}")
             
@@ -373,6 +444,8 @@ class TkinterApp:
                 self.experiment.save_minimal_state()
                 self.save_parameters_txt()
                 self.save_mice_list_txt()
+                self.last_applied = self.collect_ui_state()
+                self.refresh_ok_button()
             self.experiment.root.after(200, apply_params_and_save)
             
     def save_mice_list_txt(self):
@@ -425,6 +498,19 @@ class TkinterApp:
         analysis_root = tk.Toplevel()
         DataAnalysis(analysis_root)
         General_functions.center_the_window(analysis_root)
+
+    def show_log(self):
+        folder = getattr(self.experiment, 'exp_folder_path', None)
+        if not folder or not os.path.isdir(folder):
+            messagebox.showwarning("Show Log", "Experiment folder is not set or does not exist yet.")
+            return
+        import subprocess, sys
+        if sys.platform == "win32":
+            subprocess.Popen(["explorer", folder])
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", folder])
+        else:
+            subprocess.Popen(["xdg-open", folder])
 
     def update_user_mail(self):
         try:
